@@ -1,6 +1,8 @@
 <template>
     <div>
+        
         <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+        
         <v-navigation-drawer
             v-model="drawer"
             bottom
@@ -11,6 +13,7 @@
                 class="spacer"
                 no-gutters
                 >
+
                 <v-col>
                     <v-avatar
                     size="60px"
@@ -30,12 +33,13 @@
                 >
                     <strong>Menu</strong>
                 </v-col>
+                
             </v-row>
              
             <v-list>
                 <v-expansion-panels>
                     <v-expansion-panel
-                        v-for="page,k in pages"
+                        v-for="page,k in pagesA"
                         :key="k"
                     >
                         <v-expansion-panel-title>
@@ -59,6 +63,7 @@
                     </v-expansion-panel>
                 </v-expansion-panels>
             </v-list>
+
         </v-navigation-drawer>
     </div>
 </template>
@@ -77,12 +82,24 @@ export default {
         return {
             logo, logo,
             drawer: false,
-            group: null
+            group: null,
+            created:false,
+            pagesA:[]
         }
     },
     methods: {
         changePage(slug){
             this.$emit('changePageEmited', slug)
+        }
+    },
+
+    updated() {
+        if(this.pages && this.pages.length > 0 && this.pagesA.length == 0){
+            this.pagesA = this.pages
+        }
+        if(!this.created && this.pagesA.length > 0){
+            this.created = true;
+            this.changePage(this.pagesA[0].slug+"@"+this.pagesA[0].subpages[0].slug);
         }
     },
 }

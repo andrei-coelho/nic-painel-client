@@ -39,6 +39,7 @@ export default {
         return {
             keyActive: 0,
             logo:logo,
+            pagesA:[],
             drawer:true
         }
     },
@@ -46,9 +47,11 @@ export default {
     methods: {
 
         changeActiveItem(key){
-            this.pages[this.keyActive].active = false;
-            this.keyActive = key;
-            this.pages[this.keyActive].active = true;
+            if(this.pagesA && this.pagesA.length > 0){
+                this.pagesA[this.keyActive].active = false;
+                this.keyActive = key;
+                this.pagesA[this.keyActive].active = true;
+            }
         },
 
         changePage(key){
@@ -59,7 +62,9 @@ export default {
     },
 
     updated(){
-        console.log(this.subpages);
+        if(!this.pagesA) return;
+        if(this.pagesA.length == 0)
+        this.pagesA = this.pages;
         this.changeActiveItem(0);
         this.$emit('changePageAction', 0)
     },

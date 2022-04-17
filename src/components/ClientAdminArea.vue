@@ -4,7 +4,6 @@
         class="pa-0 ma-0"
         fill-height
         fluid="true"
-        
     >
         <v-row class="pa-0 ma-0">
             <v-col
@@ -22,7 +21,7 @@
                 style="left: 70px;  z-index:9999998;"
                 fixed
             >
-                <SubMenu :subpages="subpages" @changeSubpageAction="changeSubpageListener"/>
+                <SubMenu :service="pageSlug" :subpages="subpages" @changeSubpageAction="changeSubpageListener"/>
             </v-col>
 
             <v-col
@@ -44,9 +43,12 @@
         <v-row>
             <div style="width:140px" class="d-none d-lg-block"></div>
             <v-col class="ps-lg-3">
+                <PageComponent :routes="routesUser" :route="routeActive"/>
+                <!--
                 <v-container fuild>
-                    test
+                    <router-view></router-view>
                 </v-container>
+                -->
             </v-col>
         </v-row>
 
@@ -93,11 +95,12 @@
 import MainMenuArea from './MainMenuArea.vue';
 import TopMenuArea from './TopMenuArea.vue';
 import SubMenu from './SubMenu.vue';
+import PageComponent from './PageComponent.vue';
 
 export default {
     
     name: 'ClientAdminArea',
-    components:{MainMenuArea, TopMenuArea, SubMenu},
+    components:{MainMenuArea, TopMenuArea, SubMenu, PageComponent},
     
     async created(){
         
@@ -111,15 +114,12 @@ export default {
         
         this.user = resp.data.user;
 
-        console.log(this.user);
-
-        resp.data.pages[0].active = true;
-        resp.data.pages[0].subpages[0].active = true;
-
-        for (let i = 1; i < resp.data.pages.length; i++) {
+        for (let i = 0; i < resp.data.pages.length; i++) {
             resp.data.pages[i].active = false;
+            let routeUser = resp.data.pages[i].slug+"@";
             for (let x = 0; x < resp.data.pages[i].subpages.length; x++) {
                 resp.data.pages[i].subpages[x].active = false;
+                this.routesUser.push(routeUser+resp.data.pages[i].subpages[x].slug)
             }
         }
 
@@ -133,6 +133,8 @@ export default {
             user:null,
             pages:null,
             subpages: [],
+            routesUser: [],
+            routeActive: '',
 
             pageKey:0,
             pageSlug:'',
@@ -161,18 +163,18 @@ export default {
             // faça algo
         },
 
-
         changePageListener(key){
-            this.subpages = this.pages[key].subpages;
-            this.pageSlug = this.pages[key].slug;
+            if(this.pages && this.pages.length > 0){
+                this.subpages = this.pages[key].subpages;
+                this.pageSlug = this.pages[key].slug;
+            }
         },
         changeSubpageListener(key){
             this.subpageSlug = this.pages[this.pageKey].subpages[key].slug;
-            let route = this.pageSlug+'@'+this.subpageSlug;
-            console.log('menu diz: '+route);
+            this.routeActive = this.pageSlug+'@'+this.subpageSlug;
         },
         changePageByTopListener(route){
-            console.log('top diz: '+route);
+            this.routeActive = route
         }
 
     },

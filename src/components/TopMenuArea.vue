@@ -22,6 +22,7 @@
             </v-btn>
 
             <v-menu v-model="drawer" >
+                
                 <template v-slot:activator="{ props }">
                     <div
                         style="cursor:pointer;" 
@@ -64,9 +65,6 @@
                     
                 </v-list>
             </v-menu>
-
-            
-
 
         </v-toolbar>
 
