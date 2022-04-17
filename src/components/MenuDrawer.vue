@@ -6,37 +6,83 @@
             bottom
             temporary
         >
-        <v-list
-            :items="items"
-        ></v-list>
+            <v-row
+                align="center"
+                class="spacer"
+                no-gutters
+                >
+                <v-col>
+                    <v-avatar
+                    size="60px"
+                    class="pa-3"
+                    >
+                    <v-img
+                        alt="Avatar"
+                        :src="logo"
+                    ></v-img>
+                    </v-avatar>
+                </v-col>
+
+                <v-col
+                    class="hidden-xs-only text-left ml-2"
+                    sm="5"
+                    md="3"
+                >
+                    <strong>Menu</strong>
+                </v-col>
+            </v-row>
+             
+            <v-list>
+                <v-expansion-panels>
+                    <v-expansion-panel
+                        v-for="page,k in pages"
+                        :key="k"
+                    >
+                        <v-expansion-panel-title>
+                            <v-icon :icon="page.icon"></v-icon>
+                            {{ page.nome }}
+                        </v-expansion-panel-title>
+                        <v-expansion-panel-text>
+                            <v-list-item
+                                v-for="sub,i in page.subpages"
+                                :key="i"
+                                :value="sub.slug"
+                                active-color="info"
+                                @click="changePage(page.slug+'@'+sub.slug)"
+                            >
+                                <v-list-item-avatar start>
+                                    <v-icon :icon="sub.icon"></v-icon>
+                                </v-list-item-avatar>
+                                <v-list-item-title v-text="sub.nome"></v-list-item-title>
+                            </v-list-item>
+                        </v-expansion-panel-text>
+                    </v-expansion-panel>
+                </v-expansion-panels>
+            </v-list>
         </v-navigation-drawer>
     </div>
 </template>
 
 <script>
+
+import logo from '../assets/logo.svg'
+
 export default {
+
+    props:{
+        pages:Array
+    },
+
     data() {
         return {
+            logo, logo,
             drawer: false,
-            group: null,
-            items: [
-                {
-                title: 'Foo',
-                value: 'foo',
-                },
-                {
-                title: 'Bar',
-                value: 'bar',
-                },
-                {
-                title: 'Fizz',
-                value: 'fizz',
-                },
-                {
-                title: 'Buzz',
-                value: 'buzz',
-                },
-            ],
+            group: null
+        }
+    },
+    methods: {
+        changePage(slug){
+            this.$emit('changePageEmited', slug)
         }
     },
 }

@@ -18,13 +18,11 @@
         <v-divider></v-divider>
 
         <v-list class="text-white" style="background-color: #4087F3" density="compact" nav>
-            <v-list-item title="My Files" value="myfiles" class="white">
+            <v-list-item v-for="page,k in pages" :active="page.active" :key="k" :title="page.nome" :value="page.slug" class="white" @click="changePage(k)">
                 <template  v-slot:prepend>        
-                    <v-icon class="ma-2" color="white"> mdi-folder </v-icon> 
+                    <v-icon class="ma-2" color="white"> {{page.icon}} </v-icon> 
                 </template>
             </v-list-item>
-            <v-list-item prepend-icon="mdi-account-multiple" title="Shared with me" value="shared"></v-list-item>
-            <v-list-item prepend-icon="mdi-star" title="Starred" value="starred"></v-list-item>
         </v-list>
     </v-navigation-drawer>
            
@@ -33,11 +31,37 @@
 <script>
 import logo from '../assets/logo-white.svg'
 export default {
+    props:{
+        pages: Array
+    },
+
     data() {
         return {
+            keyActive: 0,
             logo:logo,
-            drawer: true
+            drawer:true
         }
+    },
+
+    methods: {
+
+        changeActiveItem(key){
+            this.pages[this.keyActive].active = false;
+            this.keyActive = key;
+            this.pages[this.keyActive].active = true;
+        },
+
+        changePage(key){
+            if(key == this.keyActive) return;
+            this.changeActiveItem(key)
+            this.$emit('changePageAction', this.keyActive)
+        }
+    },
+
+    updated(){
+        console.log(this.subpages);
+        this.changeActiveItem(0);
+        this.$emit('changePageAction', 0)
     },
 }
 </script>
