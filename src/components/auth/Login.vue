@@ -1,22 +1,13 @@
 <template>
-  <v-container>
-    <v-row class="text-center"
-    justify="center">
-      <v-col cols="12">
-        <v-img
-          :src="logo"
-          class="my-3"
-          contain
-          height="100"
-        />
-      </v-col>
-
-      <v-col
-        lg="6"
-      >
-      <div 
-        class="pa-5 elevation-10 rounded-xl"
-      >
+    <div>
+        <v-overlay :model-value="overlay" 
+        class="align-center justify-center">
+            <v-progress-circular
+                color="info"
+                indeterminate
+                size="64"
+            ></v-progress-circular>
+        </v-overlay>
         <v-form
           ref="form"
           v-model="valid"
@@ -41,6 +32,7 @@
           ></v-text-field>
           <v-btn
             color="primary"
+            @click="entrar()"
             flat
           > Entrar</v-btn>
           
@@ -49,25 +41,35 @@
             class="mt-4"
             color="primary"
             variant="text"
+            @click="changeTo('Forgot')"
           > esqueci minha senha</v-btn>
-      </div>
-      </v-col>
-
-    </v-row>
-  </v-container>
+          
+    </div>
 </template>
 
 <script>
-import logo from '../assets/logo.svg'
-
 export default {
-  name: 'LoginArea',
-
-  data(){
-    return {
-      logo: logo,
-      showPass: false,
-    }
-  },
+    data() {
+        return {
+            showPass: false,
+            overlay:false,
+            email:'',
+            senha:''
+        }
+    },
+    methods: {
+        changeTo(component){
+            this.$emit('changeComponentAuth', component)
+        },
+        async entrar(){
+            this.overlay = true;
+            const resp = await this.$request('@auth/logar', {
+                email:this.email,
+                senha:this.senha
+            });
+            this.overlay = false;
+            if(!resp.error) this.$emit('loged');
+        }
+    },
 }
 </script>

@@ -31,7 +31,7 @@
                     <div style="width:140px" class="d-none d-lg-block">
                     </div>
                     <v-col class="pa-0 ma-0">
-                        <TopMenuArea :pages="pages" :user="user" @changePageActionByTop="changePageByTopListener"/>
+                        <TopMenuArea :pages="pages" :user="user" @actionCloseApp="closeApp" @changePageActionByTop="changePageByTopListener"/>
                     </v-col>  
                 </v-row>
             </v-col>
@@ -160,7 +160,7 @@ export default {
         },
         closeApp(){
             this.$close_session();
-            // faça algo
+            this.$emit('restartApp');
         },
 
         changePageListener(key){

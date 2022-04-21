@@ -98,7 +98,7 @@ export default {
         },
         logout(){
             this.drawer = false;
-            alert('clicou para sair');
+            this.$emit('actionCloseApp');
         },
         edit(){
             this.drawer = false;

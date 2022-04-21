@@ -18,7 +18,7 @@ export default {
             })()
 
         function request__resetCookie(){
-            `${options.session_name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+            document.cookie = `${options.session_name}=; Max-Age=-99999999; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
         }
 
         function request__setCookie(cookie = '') {
@@ -30,8 +30,37 @@ export default {
             })() : request__resetCookie();
         }
 
+        function request__genResponse(response){
+            if(response.error && (response.code == 440 || response.code == 401)){
+                if( objApp !== 'undefined') 
+                    objApp.closeApp()
+                return false;
+            }
+                
+            if(response.error){
+                if( objApp !== 'undefined')
+                    objApp.showApiError(response.code, response.message)
+                return false;
+            }
+                
+
+            if(!response.error && response.message.trim() != ''){
+                if( objApp !== 'undefined') 
+                    objApp.showApiSuccess(response.message)
+                return false;
+            }
+                
+
+            if(response.hasOwnProperty('session')) {
+                session = response.session
+                request__setCookie();
+            }
+
+        }
+
         app.config.globalProperties.$close_session = function (){
-            request__resetCookie()
+            request__resetCookie();
+            session = null;
         }
 
         app.config.globalProperties.$set_responses_on_request = function (obj){
@@ -49,28 +78,45 @@ export default {
             .then(res => res.json())
             .then(res => res);
 
-            if(response.error && response.code == 440 && objApp !== 'undefined'){
-                objApp.closeApp()
-                return;
-            }
-                
-            if(response.error && objApp !== 'undefined')
-                objApp.showApiError(response.code, response.message)
-
-            if(!response.error && objApp !== 'undefined' && response.message.trim() != '')
-                objApp.showApiSuccess(response.message)
-
-            if(response.hasOwnProperty('session')) {
-                session = response.session
-                request__setCookie();
-            }
-
+            request__genResponse(response); 
             return response;
 
         }
 
+        if(!options.production)
         app.config.globalProperties.$showCookie = function() {
             console.log(session);
+        }
+
+        app.config.globalProperties.$has_session = function() {
+            return  session !== null;
+        }
+
+        app.config.globalProperties.$upload = async function(route, file, id = 0, callback = null) {
+
+            if(!session) return;
+            
+            var reader = new FileReader();
+
+            reader.onload = async e => {
+
+                const url = url_api+route+'/'+session+(id>0?`/${id}`:'');
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: e.target.result
+                })
+                .then(res => res.json())
+                .then(res => res);
+
+                request__genResponse(response)
+                // pare de mostrar o upload
+                if(callback) callback(response);
+            };
+
+
+            await reader.readAsDataURL(file);
+
         }
 
     }

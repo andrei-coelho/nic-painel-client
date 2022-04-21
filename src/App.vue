@@ -1,25 +1,52 @@
 <template>
   <v-app>
-    <component :is="component"/>
+    <component 
+      :is="component"
+      @restartApp="onRestart"
+      />
   </v-app>
 </template>
 
 <script>
-import LoginArea from './components/LoginArea.vue'
+import AuthArea from './components/AuthArea.vue'
 import ClientAdminArea from './components/ClientAdminArea.vue'
+import LoadingPage from './components/LoadingPage.vue'
 
 export default {
   name: 'App',
 
+  created() {
+    this.start_app()
+  },
+
   components: {
-    LoginArea,
-    ClientAdminArea
+    AuthArea,
+    ClientAdminArea,
+    LoadingPage
   },
 
   data(){
     return {
-      component: 'ClientAdminArea'
+      component: 'LoadingPage'
     }
+  },
+
+  methods: {
+
+    async start_app(){
+      if(this.$has_session()){
+        let status = await this.$request('@auth/refresh_user_client');
+        this.component = status ? 'ClientAdminArea' : 'AuthArea';
+      } else {
+        this.component = 'AuthArea'
+      }
+    },
+
+    onRestart(){
+      this.component = 'LoadingPage';
+      this.start_app()
+    }
+
   },
 }
 </script>
