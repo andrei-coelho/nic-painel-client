@@ -17,8 +17,10 @@
 
             <v-spacer></v-spacer>
             
-            <v-btn icon>
-                <v-icon class="ma-2" color="black" style="cursor:pointer"> mdi-bell-outline </v-icon> 
+            <v-btn class="text-none" stacked>
+                <v-badge content="2" color="error">
+                    <v-icon>mdi-bell-outline</v-icon>
+                </v-badge>
             </v-btn>
 
             <v-menu v-model="drawer" >

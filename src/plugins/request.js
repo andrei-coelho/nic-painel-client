@@ -17,6 +17,12 @@ export default {
                 return parts.length === 2 ? parts.pop().split(';').shift() : null;
             })()
 
+        function ___is_object(variable){
+            return typeof variable === 'object' &&
+            !Array.isArray(variable) &&
+            variable !== null
+        }
+
         function request__resetCookie(){
             document.cookie = `${options.session_name}=; Max-Age=-99999999; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
         }
@@ -31,21 +37,24 @@ export default {
         }
 
         function request__genResponse(response){
+            
+            const isObj = ___is_object(objApp);
+
             if(response.error && (response.code == 440 || response.code == 401)){
-                if( objApp !== 'undefined') 
+                if(isObj && objApp.closeApp !== 'undefined') 
                     objApp.closeApp()
                 return false;
             }
                 
             if(response.error){
-                if( objApp !== 'undefined')
+                if( ___is_object(objApp) && objApp.showApiError !== 'undefined')
                     objApp.showApiError(response.code, response.message)
                 return false;
             }
                 
 
             if(!response.error && response.message.trim() != ''){
-                if( objApp !== 'undefined') 
+                if( ___is_object(objApp) && objApp.showApiSuccess !== 'undefined') 
                     objApp.showApiSuccess(response.message)
                 return false;
             }

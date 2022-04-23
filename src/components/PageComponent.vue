@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <v-container fuild>
         <div v-if="showPage">
             <v-container fuild>
                 <router-view></router-view>
@@ -15,7 +15,7 @@
                 ></v-progress-circular>
             </v-container>
         </div>
-    </div>
+    </v-container>
 </template>
 
 <script>

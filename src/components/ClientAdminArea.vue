@@ -8,8 +8,8 @@
         <v-row class="pa-0 ma-0">
             <v-col
                 cols="1"
-                class="position-fixed ma-0 pa-0 d-none d-lg-block"
-                style="width: 70px; z-index:9999999;"
+                class=" ma-0 pa-0 d-none d-lg-block"
+                style="width: 70px; z-index:100;"
                 fixed
             >
                <MainMenuArea :pages="pages" @changePageAction="changePageListener"/>
@@ -17,15 +17,16 @@
             <div style="width:140px;" class="d-none d-lg-block"></div>
             <v-col
                 cols="1"
-                class="position-fixed ma-0 pa-0 d-none d-lg-block"
-                style="left: 70px;  z-index:9999998;"
+                class="ma-0 pa-0 d-none d-lg-block"
+                style="left: 70px;  z-index:99;"
                 fixed
             >
                 <SubMenu :service="pageSlug" :subpages="subpages" @changeSubpageAction="changeSubpageListener"/>
             </v-col>
 
             <v-col
-            class="pa-0 ma-0 position-fixed"
+            class="pa-0 ma-0"
+            cols="12"
             >
                 <v-row class="pa-0 ma-0">
                     <div style="width:140px" class="d-none d-lg-block">
@@ -38,10 +39,10 @@
             
         </v-row>
 
-        <v-row style="height: 60px;"></v-row>
+        <!-- <v-row style="height: 60px;"></v-row> -->
 
-        <v-row>
-            <div style="width:140px" class="d-none d-lg-block"></div>
+        <v-row >
+            <div style="width:140px" class="d-none d-lg-block "></div>
             <v-col class="ps-lg-3">
                 <PageComponent :routes="routesUser" :route="routeActive"/>
                 <!--

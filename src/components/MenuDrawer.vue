@@ -4,11 +4,13 @@
         <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
         
         <v-navigation-drawer
+        style="background-color:white;"
             v-model="drawer"
             bottom
             temporary
+            
         >
-            <v-row
+            <v-row style="position:relative;"
                 align="center"
                 class="spacer"
                 no-gutters
@@ -51,6 +53,7 @@
                                 v-for="sub,i in page.subpages"
                                 :key="i"
                                 :value="sub.slug"
+                                :to="'/'+page.slug+'@'+sub.slug"
                                 active-color="info"
                                 @click="changePage(page.slug+'@'+sub.slug)"
                             >
