@@ -1,5 +1,16 @@
 <template>
     <div>
+        <v-dialog
+            v-model="showFormAddFile"
+        >
+            <AddFile :dir="path" :key="keyAddFormFile" @createdFile="onCreatedFile"/>
+        </v-dialog>
+
+        <v-dialog
+            v-model="showFormAddDir"
+        >
+            <AddDir :dir="path" :key="keyAddFormDir" @createdFile="onCreatedFile"/>
+        </v-dialog>
         <v-row>
             <div class="py-3 ps-5">
                 <v-icon>mdi-folder-open</v-icon>
@@ -28,7 +39,7 @@
                 <v-row class="pt-1">
                     <v-col md="2">
 
-                        <v-menu >
+                        <v-menu v-model="drawer">
                             <template v-slot:activator="{ props }">
                                 <v-btn 
                                     prepend-icon="mdi-plus-box-outline"
@@ -39,11 +50,11 @@
                             </template>
 
                             <v-list density="compact" elevation="5">
-                                <v-list-item>
+                                <v-list-item @click="drawer = !drawer; showFormAddDir = true">
                                     <v-icon>mdi-folder-outline</v-icon>
                                     <v-list-item-title>Pasta</v-list-item-title>
                                 </v-list-item>
-                                <v-list-item>
+                                <v-list-item @click="drawer = !drawer; showFormAddFile = true">
                                     <v-icon>mdi-file-outline</v-icon>
                                     <v-list-item-title>Arquivo</v-list-item-title>
                                 </v-list-item>
@@ -160,8 +171,11 @@
                 <v-divider></v-divider>
 
                 <v-row>
-                    <v-col>
-                        <FilesCards @clickFolderEvent="onclickFolder" @clickFileEvent="onclickFile" :list="listFiles" :exibition="exibition"/>
+                    <v-col cols="12" v-show="showList">
+                        <FilesCards @clickFolderEvent="onclickFolder" @clickFileEvent="onclickFile" :list="listFiles" :exibition="exibition" :key="atualizarLista"/>
+                    </v-col>
+                    <v-col cols="12" v-show="!showList">
+                        <LoadComponent />
                     </v-col>
                 </v-row>
 
@@ -210,13 +224,15 @@
 </template>
 
 <script>
-
+import LoadComponent from '../../components/LoadComponent.vue'
 import FilesCards from './FilesCards.vue'
 import InfoFile from './InfoFile.vue'
+import AddFile from './AddFile.vue'
+import AddDir from './AddDir.vue'
 
 export default {
 
-    components:{FilesCards, InfoFile},
+    components:{FilesCards, InfoFile, AddFile, AddDir, LoadComponent},
 
     created() {
 
@@ -225,13 +241,20 @@ export default {
             this.heightInfo = window.pageYOffset > 100 ? '97%' : '80%';
         });
 
-        // carrega os arquivos e os diretórios 
-        // o data dirs atual corresponde ao caminho
+        this.generate_list()
     },
 
     data() {
         return {
             
+            showList: false,
+            atualizarLista: 0,
+            path: this.$get_client_path(),
+            keyAddFormDir: 0,
+            keyAddFormFile:0,
+            drawer:false,
+            showFormAddFile: false,
+            showFormAddDir:false,
             reloadInfoFiles:0,
             fixOnTop: false,
             heightInfo: '80%',
@@ -240,125 +263,10 @@ export default {
 
             exibition: {
                 md: 2,
-                lg: 2
+                lg: 2,
+                height: 100
             },
-            listFiles: [
-                {
-                    type:'dir',
-                    nome:'other-dir',
-                    hashId:'hashIdDir'
-                },
-                {
-                    type:'dir',
-                    nome:'other-dir',
-                    hashId:'hashIdDir'
-                },
-                {
-                    type:'dir',
-                    nome:'other-dir',
-                    hashId:'hashIdDir'
-                },
-                {
-                    type:'dir',
-                    nome:'other-dir',
-                    hashId:'hashIdDir'
-                },
-                {
-                    type:'dir',
-                    nome:'other-dir',
-                    hashId:'hashIdDir'
-                },
-                {
-                    type:'file',
-                    src:'iuhsdalkjflkdj.jpg',
-                    nome:'arquivo exemplo',
-                    ext:'.jpg',
-                    createdAt:'22/08/2021',
-                    editedAt:'22/08/2021',
-                    status: 'publicado',
-                    thumb:'https://cdn.create.vista.com/downloads/3103bee1-753e-4cd5-ab96-334c6bef0aa2_1024.jpeg',
-                    createdBy:'@andreicoelho',
-                    hashId:'hashId1',
-                    tags:['tag1', 'tag2', 'tag 3', 'tag 4'],
-                    comments: 5,
-                    taskStatus: 'finalizado'
-                },
-                {
-                    type:'file',
-                    src:'iuhsdalkjflkdj.jpg',
-                    nome:'arquivo corel',
-                    ext:'.cdr',
-                    createdAt:'22/08/2021',
-                    editedAt:'22/08/2021',
-                    status: 'publicado',
-                    thumb:'https://seeklogo.com/images/C/corel-draw-2020-logo-270FEE465B-seeklogo.com.png',
-                    createdBy:'@andreicoelho',
-                    hashId:'hashId2',
-                    tags:['tag1', 'tag2', 'tag 3', 'tag 4', 'tag 5'],
-                    comments: 0,
-                    taskStatus: 'finalizado'
-                },
-                {
-                    type:'file',
-                    src:'iuhsdalkjflkdj.jpg',
-                    nome:'arquivo exemplo',
-                    ext:'.jpg',
-                    createdAt:'22/08/2021',
-                    editedAt:'22/08/2021',
-                    status: 'publicado',
-                    thumb:'https://cdn.create.vista.com/downloads/3103bee1-753e-4cd5-ab96-334c6bef0aa2_1024.jpeg',
-                    createdBy:'@andreicoelho',
-                    hashId:'hashId1',
-                    tags:['tag1', 'tag2', 'tag 3'],
-                    comments: 2,
-                    taskStatus: 'finalizado'
-                },
-                {
-                    type:'file',
-                    src:'iuhsdalkjflkdj.jpg',
-                    nome:'arquivo corel',
-                    ext:'.cdr',
-                    createdAt:'22/08/2021',
-                    editedAt:'22/08/2021',
-                    status: 'publicado',
-                    thumb:'https://seeklogo.com/images/C/corel-draw-2020-logo-270FEE465B-seeklogo.com.png',
-                    createdBy:'@andreicoelho',
-                    hashId:'hashId2',
-                    tags:['tag1', 'tag2', 'tag 3'],
-                    comments: 3,
-                    taskStatus: 'finalizado'
-                },
-                {
-                    type:'file',
-                    src:'iuhsdalkjflkdj.jpg',
-                    nome:'arquivo exemplo bem grande para ver como fica',
-                    ext:'.jpg',
-                    createdAt:'22/08/2021',
-                    editedAt:'22/08/2021',
-                    status: 'publicado',
-                    thumb:'https://cdn.create.vista.com/downloads/3103bee1-753e-4cd5-ab96-334c6bef0aa2_1024.jpeg',
-                    createdBy:'@andreicoelho',
-                    hashId:'hashId1',
-                    tags:['tag1', 'tag2', 'tag 3'],
-                    comments: 5,
-                    taskStatus: 'finalizado'
-                },
-                {
-                    type:'file',
-                    src:'iuhsdalkjflkdj.jpg',
-                    nome:'arquivo corel',
-                    ext:'.cdr',
-                    createdAt:'22/08/2021',
-                    editedAt:'22/08/2021',
-                    status: 'publicado',
-                    thumb:'https://seeklogo.com/images/C/corel-draw-2020-logo-270FEE465B-seeklogo.com.png',
-                    createdBy:'@andreicoelho',
-                    hashId:'hashId2',
-                    tags:['tag1', 'tag2', 'tag 3'],
-                    comments: 5,
-                    taskStatus: 'finalizado'
-                },
-            ],
+            listFiles: [],
             selected:['pastas', 'arquivos'],
             showSearch: false,
 
@@ -384,8 +292,21 @@ export default {
 
     methods: {
 
+        async generate_list(){
+            
+            this.showList = false;
+            
+            let resp = await this.$request("client@files/list_all_files", {
+                hash_dir: this.path
+            });
+            if(resp.error) return;
+            
+            this.listFiles = resp.data;
+            this.atualizarLista++;
+            this.showList = true;
+        },
+
         go_to(value){
-            console.log(value);
             let dirs = [];
             for (let i = 0; i < this.dirsAtual.length; i++) {
                 dirs.push(this.dirsAtual[i]);
@@ -411,7 +332,13 @@ export default {
         },
 
         onclickFolder(k){
+            this.path = this.listFiles[k].hashId
+            this.keyAddForm++;
+        },
 
+        onCreatedFile(obj){
+            listFiles.unshift(obj)
+            atualizarLista++
         },
 
         changeExibition(slug){
@@ -419,21 +346,24 @@ export default {
                 case 'pequeno':
                     this.exibition = {
                         md: 2,
-                        lg: 2
+                        lg: 2,
+                        height: 100
                     }
                 break;
 
                 case 'medio':
                     this.exibition = {
                         md: 4,
-                        lg: 3
+                        lg: 3,
+                        height: 130
                     }
                 break;
 
                 case 'grande':
                     this.exibition = {
                         md: 4,
-                        lg: 4
+                        lg: 4,
+                        height: 160
                     }
                 break;
 

@@ -49,7 +49,7 @@ export default {
         async uploadFile(){
             if(!this.file) return;
             this.overlay = true;
-            await this.$upload('@test/test', this.file, 0, this.onResponseUpload);
+            await this.$upload('@test/test', this.file, {}, this.onResponseUpload);
         },
 
         getFileUpload(e){

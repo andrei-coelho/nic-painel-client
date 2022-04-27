@@ -2,25 +2,22 @@
     <v-container fuild>
         <div v-if="showPage">
             <v-container fuild>
-                <router-view></router-view>
+                <router-view @alert="showAlert"></router-view>
             </v-container>
         </div>
         <div v-else>
-            <v-container fuild class="text-center">
-                <v-progress-circular
-                :size="70"
-                :width="7"
-                color="info"
-                indeterminate
-                ></v-progress-circular>
-            </v-container>
+            <LoadComponent/>
         </div>
     </v-container>
 </template>
 
 <script>
 
+import LoadComponent from './LoadComponent.vue'
+
 export default {
+
+    components:{LoadComponent},
 
     props:{
         routes:Array,
@@ -35,6 +32,9 @@ export default {
         checkUser(){
             this.showPage = this.routes && this.route && this.routes.include(this.route)
         },
+        showAlert(message, type = 'success', code = 404){
+            this.$emit('showSnackBar', message, type, code)
+        }
     },
     updated() {
         if(this.routes && this.routes.length > 0 && this.route){
@@ -45,8 +45,5 @@ export default {
         }
     },
 
-    watch:{
-        
-    }
 }
 </script>

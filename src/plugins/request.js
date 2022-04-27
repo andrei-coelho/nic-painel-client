@@ -1,21 +1,23 @@
 export default {
     
     install : function (app, options) {
-    
-        const url_api = options.production ? options.url_production : options.url_development;
-        var objApp;
+        
+        const url = options.production ? options.url_production : options.url_development,
+              url_api = url + 'api/';
 
-        var session = 
-            !options.production && options.hasOwnProperty('session') 
-            ? (()=>{
-                request__setCookie(options.session);
-                return options.session;
-            })()
-            : (() => {
-                const value = `; ${document.cookie}`;
-                const parts = value.split(`; ${options.session_name}=`);
-                return parts.length === 2 ? parts.pop().split(';').shift() : null;
-            })()
+        var objApp,
+            client_path,
+            session = 
+                !options.production && options.hasOwnProperty('session') 
+                ? (()=>{
+                    request__setCookie(options.session);
+                    return options.session;
+                })()
+                : (() => {
+                    const value = `; ${document.cookie}`;
+                    const parts = value.split(`; ${options.session_name}=`);
+                    return parts.length === 2 ? parts.pop().split(';').shift() : null;
+                })()
 
         function ___is_object(variable){
             return typeof variable === 'object' &&
@@ -86,7 +88,7 @@ export default {
             })
             .then(res => res.json())
             .then(res => res);
-
+            
             request__genResponse(response); 
             return response;
 
@@ -101,30 +103,57 @@ export default {
             return  session !== null;
         }
 
-        app.config.globalProperties.$upload = async function(route, file, id = 0, callback = null) {
+        app.config.globalProperties.$set_client_path = function(client_path){
+            client_path = client_path;
+        }
+
+        app.config.globalProperties.$get_client_path = function(){
+            return client_path;
+        }
+
+        app.config.globalProperties.$file = function(module, file) {
+            return url + module +'/'+session+'/'+client_path+'/'+file;
+        }
+
+        app.config.globalProperties.$upload = async function(route, file, data = {}, callbackS = null, callbackE) {
 
             if(!session) return;
             
+            data.session = session; 
+            data.mime = file.name.substring(file.name.length -3, file.name.length);
+            data.name = file.name.substring(0, file.name.length -4);
+            
+
             var reader = new FileReader();
-
+            
             reader.onload = async e => {
+                
+                data.file = e.target.result;
 
-                const url = url_api+route+'/'+session+(id>0?`/${id}`:'');
+                console.log(data);
+                
+                var status = true;
 
+                const url = url_api+route;
                 const response = await fetch(url, {
                     method: 'POST',
-                    body: e.target.result
+                    body: JSON.stringify(data)
                 })
                 .then(res => res.json())
-                .then(res => res);
+                .then(res => res)
+                .catch((error) => {
+                    status = false;
+                    if(callbackE)
+                    callbackE(error)
+                });
 
+                if(status)
                 request__genResponse(response)
                 // pare de mostrar o upload
-                if(callback) callback(response);
+                if(status && callbackS) callbackS(response);
             };
 
-
-            await reader.readAsDataURL(file);
+            return await reader.readAsDataURL(file);
 
         }
 

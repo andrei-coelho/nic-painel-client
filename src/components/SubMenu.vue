@@ -26,10 +26,12 @@
 
 <script>
 export default {
+    
     props: {
         subpages: Array,
         service: String
     },
+
     data() {
         return {
             keyActive: 0,

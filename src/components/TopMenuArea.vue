@@ -13,7 +13,7 @@
                 <img :src="logo">
             </v-toolbar-title>
 
-            <v-toolbar-title class="d-none d-lg-block">{{ userObject.cliente_nome }}</v-toolbar-title>
+            <v-toolbar-title class="d-none d-lg-block">{{ userObject.client_nome }}</v-toolbar-title>
 
             <v-spacer></v-spacer>
             

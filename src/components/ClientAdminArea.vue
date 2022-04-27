@@ -44,12 +44,7 @@
         <v-row >
             <div style="width:140px" class="d-none d-lg-block "></div>
             <v-col class="ps-lg-3">
-                <PageComponent :routes="routesUser" :route="routeActive"/>
-                <!--
-                <v-container fuild>
-                    <router-view></router-view>
-                </v-container>
-                -->
+                <PageComponent :routes="routesUser" :route="routeActive" @showSnackBar="showSnackBarMessage"/>
             </v-col>
         </v-row>
 
@@ -107,13 +102,14 @@ export default {
         
         this.$set_responses_on_request(this)
         let resp = await this.$request('@auth/load_me');
-        
+
         if(resp.error){
             this.closeApp()
             return;
         }
         
         this.user = resp.data.user;
+        this.$set_client_path(this.user.client_path);
 
         for (let i = 0; i < resp.data.pages.length; i++) {
             resp.data.pages[i].active = false;
@@ -162,6 +158,14 @@ export default {
         closeApp(){
             this.$close_session();
             this.$emit('restartApp');
+        },
+
+        showSnackBarMessage(message, type = 'success', code = 404){
+            if(type == 'error'){
+                this.showApiError(code, message)
+            } else {
+                this.showApiSuccess(message)
+            }
         },
 
         changePageListener(key){

@@ -13,7 +13,7 @@ createApp(App)
   .use(request, {
     production:false,
     url_production: 'http://',
-    url_development: 'http://localhost:8800/api/',
+    url_development: 'http://localhost:8800/',
     session_name: 'nic_user_client_sess',
     //session: 'session-gustavo'
   })
