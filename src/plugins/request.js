@@ -49,7 +49,7 @@ export default {
             }
                 
             if(response.error){
-                if( ___is_object(objApp) && objApp.showApiError !== 'undefined')
+                if( ___is_object(objApp) && objApp.showApiError !== 'undefined' && response.message.trim() != '')
                     objApp.showApiError(response.code, response.message)
                 return false;
             }

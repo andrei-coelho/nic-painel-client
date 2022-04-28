@@ -5,7 +5,7 @@
                 v-if="file.type == 'file'">
                 <v-card
                     elevation="0"
-                    :class="`mx-auto my-1 justify-center ${file.active !== 'undefined' && file.active ? 'active' : ''}`"
+                    :class="`mx-auto my-1 ${file.novo ? 'novo' : ''} justify-center ${file.active !== 'undefined' && file.active ? 'active' : ''}`"
                     @click="emmitClickFileEvent(k)"
                     density="compact"
                     draggable="true"
@@ -34,7 +34,7 @@
                                         <v-icon>mdi-cursor-move</v-icon>
                                         <v-list-item-title>mover</v-list-item-title>
                                     </v-list-item>
-                                    <v-list-item @click="fileAction('excluir', k)">
+                                    <v-list-item @click="fileAction('excluir_file', k)">
                                         <v-icon>mdi-delete-forever</v-icon>
                                         <v-list-item-title>excluir</v-list-item-title>
                                     </v-list-item>
@@ -55,7 +55,6 @@
                         ">
                     </div>
 
-    
                     <h5 class="px-2 text-center">{{ file.nome }} <span class="text-caption px-2">{{ file.ext }}</span></h5>
 
                 </v-card>
@@ -63,7 +62,7 @@
             <div v-else>
                 <v-card
                     elevation="0"
-                    class="mx-auto my-1 justify-center"
+                    :class="`mx-auto my-1 justify-center ${file.novo ? 'novo' : ''}`"
                     @click="emmitClickFolderEvent(k)"
                     @drop="onDrop($event, k)"
                     @dragenter.prevent
@@ -90,7 +89,7 @@
                                         <v-icon>mdi-cursor-move</v-icon>
                                         <v-list-item-title>mover</v-list-item-title>
                                     </v-list-item>
-                                    <v-list-item @click="fileAction('excluir', k)">
+                                    <v-list-item @click="fileAction('excluir_dir', k); ">
                                         <v-icon>mdi-delete-forever</v-icon>
                                         <v-list-item-title>excluir</v-list-item-title>
                                     </v-list-item>
@@ -149,26 +148,32 @@ export default {
                 // pegar o link para dowload
                 window.open('https://uceeba2268511d0e505a81d5b678.dl.dropboxusercontent.com/cd/0/get/BkGwfKpxINdgNRnMmi_iq-g-Fz9ktXcv2JK48Pn4RZUj7BqM1GOZuq56y7T1vjSZWcTrR2RBJiLDPVaooTQDVFgMJUeL4SSPffoVfqWlIqcRolWtqiypuifY7EX7aQoiMZ8fyv8vp63WdzJ-Kn1ilNKmnA1_aMCABPohzn4Qz53W6kl4O8y2TJzxXzgC52cn0-E/file')
             }
+
+            this.$emit('fileActionEvent', k, action)
+
         },
 
         onDrop(event, k){
             const item = event.dataTransfer.getData('keyItem');
-            console.log(`Dropou o arquivo - ${item} no diretorio ${this.listFiles[k].hashId}`);
+            this.$request('client@files/move_file', {
+                hash_file:this.listFiles[item].hashId,
+                hash_dir :this.listFiles[k].hashId
+            })
+            console.log(`Dropou o arquivo - ${this.listFiles[item].hashId} no diretorio ${this.listFiles[k].hashId}`);
+            this.$emit('deleteFile', item)
         },
 
         onDrag(event, k){
             event.dataTransfer.dropEffect = 'move'
             event.dataTransfer.effectAllowed = 'move'
             event.dataTransfer.setData('keyItem', k)
-        }
+        },
 
     },
-
+    
     updated() {
         this.cols = this.exibition
-        this.listFiles = this.list
     },
-
 }
 </script>
 
@@ -176,5 +181,9 @@ export default {
 <style scoped>
     .active {
         border: 1px solid #E6E6E6;
+    }
+
+    .novo {
+        border: 1px solid #31953F;
     }
 </style>

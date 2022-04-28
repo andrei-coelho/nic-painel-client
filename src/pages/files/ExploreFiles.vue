@@ -1,15 +1,53 @@
 <template>
     <div>
+        
+        <v-dialog
+            v-model="alertToYou"
+            max-width="290"
+            style="left:40%; right: 40%;"
+            >
+            <v-card class="">
+                <v-card-title class="text-h5">
+                    <h3 class="text-center mx-auto">Cuidado!</h3>
+                </v-card-title>
+
+                <v-card-text>
+                    {{ messageCaution }}
+                </v-card-text>
+                    <v-btn
+                        color="info"
+                        size="large"
+                        class="mx-auto d-block"
+                        flat
+                        @click="alertToYou = false"
+                    >
+                        NÃO
+                    </v-btn>
+                    <v-spacer></v-spacer>
+                <v-card-actions class="w-100">
+                    <v-btn
+                        color="green"
+                        class="mx-auto d-block"
+                        size="small"
+                        @click="excluirArquivo()"
+                    >
+                        sim, eu quero
+                    </v-btn>
+                    
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+     
         <v-dialog
             v-model="showFormAddFile"
         >
-            <AddFile :dir="path" :key="keyAddFormFile" @createdFile="onCreatedFile"/>
+            <AddFile :dir="path" :key="keyAddFormFile" @listChanged="setNewObjcOnList"/>
         </v-dialog>
 
         <v-dialog
             v-model="showFormAddDir"
         >
-            <AddDir :dir="path" :key="keyAddFormDir" @createdFile="onCreatedFile"/>
+            <AddDir :dir="path" :key="keyAddFormDir" @listChanged="setNewObjcOnList"/>
         </v-dialog>
         <v-row>
             <div class="py-3 ps-5">
@@ -21,9 +59,9 @@
                         <v-icon icon="mdi-chevron-right"></v-icon>
                     </div>
                     <v-breadcrumbs-item
-                        :text="dir.text"
+                        :text="dir.nome"
                         :href="`#${(k+1)}`"
-                        @click="go_to(dir.hash)"
+                        @click="go_to(dir.hashId)"
                         >
                     </v-breadcrumbs-item>
                 </v-breadcrumbs-divider>
@@ -69,12 +107,35 @@
                         flat></v-btn>
                     </v-col>
 
-                    <v-col cols="3" class="d-none d-md-inline">
-                        <v-menu :anchor="anchor">
+                    <v-col md="8" class="d-none d-md-block">
+                        <!--
+                        <v-menu :anchor="anchor" >
+
+                            <template v-slot:activator="{ props }">
+                                <v-btn 
+                                    prepend-icon="mdi-filter-variant"
+                                    v-bind="props"
+                                    class="float-right"
+                                flat>
+                                    FILTRAR
+                                </v-btn>
+                            </template>
+
+                            <v-list density="compact" elevation="5">
+                                <v-list-item @click="changeExibition('pequeno')">
+                                    <v-icon>mdi-view-module</v-icon>
+                                    <v-list-item-title>pequeno</v-list-item-title>
+                                </v-list-item>
+                            </v-list>
+
+                        </v-menu>
+                        -->
+                        <v-menu :anchor="anchor" >
                             <template v-slot:activator="{ props }">
                                 <v-btn 
                                     prepend-icon="mdi-apps"
                                     v-bind="props"
+                                    class="float-right"
                                 flat>
                                     Exibir
                                 </v-btn>
@@ -96,30 +157,7 @@
                             </v-list>
                         </v-menu>
                     </v-col>
-                    <v-col cols="2" class="d-none d-md-inline">
-                        <v-checkbox
-                            v-model="selected"
-                            density="compact"
-                            class="ma-0 pa-0"
-                            label="Pastas"
-                            color="indigo"
-                            value="pastas"
-                            hide-details
-                        ></v-checkbox>
-                    </v-col>
-                    <v-col cols="2" class="d-none d-md-inline">
-                        <v-checkbox
-                            v-model="selected"
-                            density="compact"
-                            class="ma-0 pa-0"
-                            label="Arquivos"
-                            color="indigo"
-                            value="arquivos"
-                            checked="true"
-                            hide-details
-                        ></v-checkbox>
-                    </v-col>
-                    <v-col></v-col>
+                    
                 </v-row>
 
                 <div v-if="showSearch">
@@ -172,7 +210,14 @@
 
                 <v-row>
                     <v-col cols="12" v-show="showList">
-                        <FilesCards @clickFolderEvent="onclickFolder" @clickFileEvent="onclickFile" :list="listFiles" :exibition="exibition" :key="atualizarLista"/>
+                        <FilesCards 
+                            @clickFolderEvent="onclickFolder" 
+                            @clickFileEvent="onclickFile" 
+                            @deleteFile="onDeleteFile"
+                            @fileActionEvent="onFileAction"
+                            :list="listFiles" 
+                            :exibition="exibition" 
+                            :key="atualizarLista"/>
                     </v-col>
                     <v-col cols="12" v-show="!showList">
                         <LoadComponent />
@@ -203,7 +248,7 @@
                                 </v-row>
 
                                 <v-row class="mt-2">
-                                    <InfoFile :fileInfo="atualFile" :key="reloadInfoFiles"/>
+                                    <InfoFile @fileNameEdited="onEditFileName" :fileInfo="atualFile" :key="reloadInfoFiles" :keyObj="keyO"/>
                                 </v-row>
 
                             </v-col>
@@ -234,19 +279,13 @@ export default {
 
     components:{FilesCards, InfoFile, AddFile, AddDir, LoadComponent},
 
-    created() {
-
-        document.addEventListener("scroll", e => {
-            this.fixOnTop = window.pageYOffset > 100
-            this.heightInfo = window.pageYOffset > 100 ? '97%' : '80%';
-        });
-
-        this.generate_list()
-    },
-
     data() {
         return {
             
+            indexAtualFile:-1,
+            messageCaution:'',
+            alertToYou:false,
+            loadFiles:false,
             showList: false,
             atualizarLista: 0,
             path: this.$get_client_path(),
@@ -258,7 +297,7 @@ export default {
             reloadInfoFiles:0,
             fixOnTop: false,
             heightInfo: '80%',
-
+            keyO:0,
             atualFile:{},
 
             exibition: {
@@ -275,20 +314,24 @@ export default {
                 display:false
             },
 
-            dirsAtual: [
-                {
-                    text: 'raiz',
-                    hash:'root',
-                    disabled: false
-                },
-                {
-                    text: 'inner',
-                    hash:'inner',
-                    disabled: false
-                },
-            ]
+            dirsAtual:[]
         }
     },  
+
+    created() {
+
+        document.addEventListener("scroll", e => {
+            this.fixOnTop = window.pageYOffset > 100
+            this.heightInfo = window.pageYOffset > 100 ? '97%' : '80%';
+        });
+
+        this.dirsAtual.push({
+            nome: 'raiz',
+            hashId:''
+        });
+
+        this.generate_list()
+    },
 
     methods: {
 
@@ -299,20 +342,49 @@ export default {
             let resp = await this.$request("client@files/list_all_files", {
                 hash_dir: this.path
             });
+
             if(resp.error) return;
             
             this.listFiles = resp.data;
             this.atualizarLista++;
             this.showList = true;
+            this.loadFiles = false;
         },
 
         go_to(value){
+            
+            if(this.loadFiles) return;
+            this.loadFiles = true;
+
             let dirs = [];
             for (let i = 0; i < this.dirsAtual.length; i++) {
                 dirs.push(this.dirsAtual[i]);
-                if(this.dirsAtual[i].hash == value) break;
+                if(this.dirsAtual[i].hashId == value) {
+                    this.path = this.dirsAtual[i].hashId;
+                    this.keyAddForm++;
+                    break;
+                }
             }
+
             this.dirsAtual = dirs;
+            this.generate_list();
+        },
+
+        onclickFolder(k){
+            this.dirsAtual.push(this.listFiles[k]);
+            this.go_to(this.listFiles[k].hashId)
+        },
+
+        setNewObjcOnList(objs){
+            setTimeout(e => {
+                this.showFormAddDir = false;
+                this.showFormAddFile = false;
+            }, 300)
+
+            for (let i = 0; i < objs.length; i++) {
+                const obj = objs[i];
+                this.listFiles.unshift(obj);
+            }
         },
 
         hideDataFileInfo(){
@@ -326,19 +398,50 @@ export default {
         },
 
         onclickFile(k){
+            this.keyO = k;
             this.reloadInfoFiles++;
             this.atualFile = this.listFiles[k];
             this.showDataFileInfo();
         },
 
-        onclickFolder(k){
-            this.path = this.listFiles[k].hashId
-            this.keyAddForm++;
+        onDeleteFile(item){
+            this.listFiles.splice(item, 1); 
+            this.infoArea = {
+                cols:12,
+                display:false
+            }
         },
 
-        onCreatedFile(obj){
-            listFiles.unshift(obj)
-            atualizarLista++
+        onFileAction(k, action){
+            this.indexAtualFile = k;
+
+            if(action == 'excluir_dir'){
+                this.messageCaution = 'Ao excluir a pasta, todos os arquivos e subpastas contidos nela serão apagados. Tem certeza que quer fazer isso?'
+                this.alertToYou = true;
+            }
+
+            if(action == 'excluir_file'){
+                this.messageCaution = "Tem certerza que quer excluir este arquivo?"
+                this.alertToYou = true;
+            }
+        },
+
+        async excluirArquivo(){
+            let file = this.listFiles[this.indexAtualFile];
+            let resp = await this.$request('client@files/delete_file', {
+                hash_file: file.hashId,
+                type: file.type
+            });
+            if(resp.error) return;
+            this.listFiles.splice(this.indexAtualFile,1);
+            this.alertToYou = false;
+        },
+
+        onEditFileName(k, hashId, nome){
+            if(this.listFiles[k].hashId == hashId){
+                this.listFiles[k].nome = nome;
+                this.atualizarLista++;
+            }
         },
 
         changeExibition(slug){
@@ -378,5 +481,5 @@ export default {
     min-height: auto !important;
     display: flex !important;
     align-items: center !important;
-  }
+}
 </style>

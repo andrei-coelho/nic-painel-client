@@ -27,6 +27,7 @@
                     <v-btn
                         color="info"
                         class="ma-0"
+                        @click="editFileName()"
                     >salvar nome</v-btn>
                     <v-btn
                         @click="showEditNome = !showEditNome"
@@ -39,12 +40,13 @@
             </v-row>
         </v-col>
 
-        <v-col cols="12">
+        <v-col cols="12" v-show="fileDetail">
             <p>{{ file.status }}</p>
-            <span class="text-grey">criado por: </span><span class="text-info">{{ file.createdBy }}</span><br>
-            <span class="text-grey">criado em: </span><span class="text-black">{{ file.createdAt }}</span><br>
-            <span class="text-grey">editado em: </span><span class="text-black">{{ file.editedAt }}</span>
+            <span class="text-grey">criado por: </span><span class="text-info">{{ fileDetailObj.createdBy }}</span><br>
+            <span class="text-grey">criado em:  </span><span class="text-black">{{ fileDetailObj.createdAt }}</span><br>
+            <span class="text-grey">editado em: </span><span class="text-black">{{ fileDetailObj.editedAt }}</span>
         </v-col>
+        <!-- 
         <v-divider></v-divider>
         <v-col cols="12">
             <v-row>
@@ -58,6 +60,7 @@
                 </v-col>
             </v-row>
         </v-col>
+        -->
         <v-divider></v-divider>
         <v-col cols="12"><span class="h3 my-2">Tags: </span><v-btn
                 v-show="!showEditTag"
@@ -78,6 +81,7 @@
             <v-btn
                 color="info"
                 class="ma-0"
+                @click="addtag()"
             >adicionar tag</v-btn>
             <v-btn
                 @click="showEditTag = !showEditTag"
@@ -92,73 +96,115 @@
             <v-item-group multiple>
                 <v-item
                 class="pa-5"
-                v-for="tag,k in file.tags"
+                v-for="tag,k in tags"
                 :key="k"
                 >   
-                   
                     <v-chip
                         active-class="purple--text"
                         :input-value="active"
+                        closable
+                        color="info"
+                        text-color="white"
+                        @click="removeTag(tag.tag_id)"
                     >   
-                        {{tag}}
+                        {{tag.nome}}
                     </v-chip>
-                    <v-btn
-                        size="x-small"
-                        flat
-                        icon="mdi-close"
-                        color="white"
-                        style="position:relative; left:-15px; top: -15px;"
-                    ></v-btn>
+                    
                 </v-item>
             </v-item-group>
             
         </v-col>
         
         <v-divider></v-divider>
-
-        <v-col cols="12" class="mt-2"> 
-            
-            <v-btn color="info" 
-            size="small"
-            prepend-icon="mdi-information-outline">DETALHES DO ARQUIVO</v-btn>
-            <v-btn
-            size="small"
-                prepend-icon="mdi-cursor-move"
-            >mudar de pasta</v-btn>
-        </v-col>
-
-        <v-col>
-            <v-btn
-                size="x-small"
-                flat
-                prepend-icon="mdi-close"
-                color="error"
-            >DELETAR ARQUIVO</v-btn>
-        </v-col>
-
+        
     </div>
+    
 </template>
 
 <script>
 export default {
+
+    async mounted() {
+        this.getDetails();
+        this.getTags();
+    },
     
     props:{
-        fileInfo:Object
+        fileInfo:Object,
+        keyObj:Number
     },
     data() {
         return {
             showEditNome:false,
             showEditTag:false,
             file:this.fileInfo,
+            fileDetailObj:{},
+            fileDetail:false,
             valueName: this.fileInfo.nome,
-            valueTag: ''
+            keyO:this.keyObj,
+            valueTag: '',
+            tags:[]
+        }
+    },
+
+    methods: {
+
+        async getDetails(){
+            if(!this.file.hasOwnProperty('hashId')) return;
+            let resp1 =  await this.$request('client@files/file_info', {
+                hash_file: this.file.hashId
+            });
+            if(!resp1.error){
+                this.fileDetailObj = resp1.data;
+                this.fileDetail = true;
+            }
+        },
+
+        async addtag(){
+            let resp = await this.$request('client@files/add_tag',{
+                hash_file: this.file.hashId,
+                tag: this.valueTag
+            })
+            if(resp.error) return;
+            this.tags.unshift({
+                nome: this.valueTag,
+                id: resp.data.tag_id
+            })
+            this.valueTag = '';
+            this.showEditTag = false;
+        },
+
+        async removeTag(id){
+            let resp = await this.$request('client@files/remove_tag',{
+                hash_file: this.file.hashId,
+                tag_id: id
+            })
+            if(resp.error) return;
+        },
+
+        async getTags(){
+            if(!this.file.hasOwnProperty('hashId')) return;
+            let resp = await this.$request('client@files/get_tags',{
+                hash_file: this.file.hashId
+            })
+            if(resp.error) return;
+            this.tags = resp.data
+        },
+
+        async editFileName(){
+            let resp = await this.$request('client@files/edit_file_name',{
+                hash_file: this.file.hashId,
+                nome: this.valueName
+            })
+            if(resp.error) return;
+            this.showEditNome = false;
+            this.$emit('fileNameEdited', this.keyO, this.file.hashId, this.valueName)
         }
     },
     updated() {
         this.file = this.fileInfo;
         this.valueName = this.file.nome;
         this.showEditNome = false;
-        //this.showEditTag = false;
     },
     
 }

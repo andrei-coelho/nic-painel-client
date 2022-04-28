@@ -1,5 +1,7 @@
 <template>
-    <v-snackbar
+    
+    <v-row>
+        <v-snackbar
             v-model="snackbarerror"
             color="red"
             top="true"
@@ -32,7 +34,6 @@
                 </v-btn>
             </template>
         </v-snackbar>
-    <v-row>
         <v-card class="py-5">
             
             <v-card-title>
@@ -112,7 +113,8 @@ export default {
             index: 1,
             responses:0,
             dialogLoading: false,
-            hash_dir:this.dir
+            hash_dir:this.dir,
+            objs:[]
         }
     },
 
@@ -142,7 +144,8 @@ export default {
         onResponseUpload(response){
             this.responses++;
             this.index++;
-            console.log(response);
+            if(response.code == 200) 
+                this.objs.push(response.data)
         },
 
         onResponseError(error){
@@ -161,7 +164,8 @@ export default {
         responses(){
             if(this.responses == this.filesToUp.length){
                 this.removeLoad()
-                this.showAlert('Arquivos gravados com sucesso');
+                this.$emit('listChanged', this.objs)
+                this.objs = []
             } 
         }
     },

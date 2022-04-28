@@ -100,22 +100,28 @@ export default {
     },
     methods: {
         async criarPasta(){
-
+            
             if(!this.dir_name) return;
+
+            this.dialogLoading = true;
+
             let resp = await this.$request('client@files/add_folder', {
                 hash_dir:this.hash_dir,
                 name:this.dir_name
             });
 
-            console.log(resp);
-
+            if(resp.code == 200){
+                this.$emit('listChanged', [resp.data])
+            } else {
+                this.errorCode = resp.code;
+                this.errorStr  = resp.message;
+                this.showAlert("Não foi possível criar o diretório.", 'error')
+            }
+                
         },
 
         removeLoad(){
             this.dialogLoading = false;
-            this.filesToUp = [];
-            this.responses = 0;
-            this.index = 1;
         },
 
         showAlert(message, type = 'success'){
