@@ -120,8 +120,9 @@ export default {
             if(!session) return;
             
             data.session = session; 
-            data.mime = file.name.substring(file.name.length -3, file.name.length);
-            data.name = file.name.substring(0, file.name.length -4);
+            let parts = file.name.split('.');
+            data.mime = parts[parts.length -1];
+            data.name = file.name.substring(0, file.name.length - (data.mime.length + 1));
             
 
             var reader = new FileReader();

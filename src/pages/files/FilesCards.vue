@@ -1,5 +1,5 @@
 <template>
-    <v-row class="pa-0">
+    <v-row v-if="listFiles.length > 0" class="pa-0">
         <v-col v-for="file,k in listFiles" :key="k" :cols="file.type == 'file' ? '12': '6'" :md="cols.md" :lg="cols.lg" >
             <div 
                 v-if="file.type == 'file'">
@@ -14,7 +14,11 @@
                     <v-row>
                         <v-col cols="6"></v-col>
                         <v-col cols="6">
-                            <v-menu anchor="start">
+                            <v-menu 
+                                v-model="file.click"
+                                anchor="start"
+                                close-on-click="true"
+                            >
                                 <template v-slot:activator="{ props }">
                                     <v-btn 
                                         size="x-small"
@@ -26,15 +30,15 @@
 
                                 <v-list density="compact" elevation="5" 
                                     >
-                                    <v-list-item @click="fileAction('baixar', k)">
+                                    <v-list-item @click="file.click = false; fileAction('baixar', k)">
                                         <v-icon>mdi-download</v-icon>
                                         <v-list-item-title>baixar</v-list-item-title>
                                     </v-list-item>
-                                    <v-list-item @click="fileAction('mover', k)">
+                                    <v-list-item @click="file.click = false;fileAction('mover', k)">
                                         <v-icon>mdi-cursor-move</v-icon>
                                         <v-list-item-title>mover</v-list-item-title>
                                     </v-list-item>
-                                    <v-list-item @click="fileAction('excluir_file', k)">
+                                    <v-list-item @click="file.click = false;fileAction('excluir_file', k)">
                                         <v-icon>mdi-delete-forever</v-icon>
                                         <v-list-item-title>excluir</v-list-item-title>
                                     </v-list-item>
@@ -73,7 +77,10 @@
                     <v-row>
                         <v-col cols="6"></v-col>
                         <v-col cols="6">
-                            <v-menu anchor="start">
+                            <v-menu 
+                                anchor="start"
+                                v-model="file.click"
+                                >
                                 <template v-slot:activator="{ props }">
                                     <v-btn 
                                         size="x-small"
@@ -85,11 +92,11 @@
 
                                 <v-list density="compact" elevation="5" 
                                     >
-                                    <v-list-item @click="fileAction('mover', k)">
+                                    <v-list-item @click="file.click = false;fileAction('mover', k)">
                                         <v-icon>mdi-cursor-move</v-icon>
                                         <v-list-item-title>mover</v-list-item-title>
                                     </v-list-item>
-                                    <v-list-item @click="fileAction('excluir_dir', k); ">
+                                    <v-list-item @click="file.click = false;fileAction('excluir_dir', k); ">
                                         <v-icon>mdi-delete-forever</v-icon>
                                         <v-list-item-title>excluir</v-list-item-title>
                                     </v-list-item>
@@ -111,9 +118,17 @@
             </div>
         </v-col>
     </v-row>
+    <v-row class="pa-0 justify-center" v-else>
+        <v-col cols="12" lg="5">
+            <img :src="alone" style="width: 100%;" class="d-block mx-auto">
+        </v-col>
+    </v-row>
 </template>
 
 <script>
+
+import alone from '../../assets/img-alone.jpg'
+
 export default {
 
     props:{
@@ -125,7 +140,8 @@ export default {
         return {
             lastK:0,
             cols:this.exibition,
-            listFiles: this.list
+            listFiles: this.list,
+            alone:alone
         }
     },
 
@@ -155,11 +171,11 @@ export default {
 
         onDrop(event, k){
             const item = event.dataTransfer.getData('keyItem');
+            if(this.listFiles[item].hashId == this.listFiles[k].hashId) return;
             this.$request('client@files/move_file', {
                 hash_file:this.listFiles[item].hashId,
                 hash_dir :this.listFiles[k].hashId
             })
-            console.log(`Dropou o arquivo - ${this.listFiles[item].hashId} no diretorio ${this.listFiles[k].hashId}`);
             this.$emit('deleteFile', item)
         },
 

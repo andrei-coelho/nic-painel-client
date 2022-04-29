@@ -2,16 +2,29 @@
     <div>
         
         <v-dialog
+            v-model="showSelectDir"
+            fullscreen
+            style="z-index: 999999999;"
+        >   
+            <FoldersCards 
+                @deleteFile="onDeleteFile" 
+                :kFile="kFile"
+                :file="fileMove" 
+                @closeDirSelect="showSelectDir = false"
+            />
+        </v-dialog>
+
+        <v-dialog
             v-model="alertToYou"
             max-width="290"
-            style="left:40%; right: 40%;"
+            style="left:40%; right: 40%; z-index: 999999999;"
             >
             <v-card class="">
                 <v-card-title class="text-h5">
                     <h3 class="text-center mx-auto">Cuidado!</h3>
                 </v-card-title>
 
-                <v-card-text>
+                <v-card-text class="text-center">
                     {{ messageCaution }}
                 </v-card-text>
                     <v-btn
@@ -270,6 +283,7 @@
 
 <script>
 import LoadComponent from '../../components/LoadComponent.vue'
+import FoldersCards from './FoldersCards.vue'
 import FilesCards from './FilesCards.vue'
 import InfoFile from './InfoFile.vue'
 import AddFile from './AddFile.vue'
@@ -277,11 +291,14 @@ import AddDir from './AddDir.vue'
 
 export default {
 
-    components:{FilesCards, InfoFile, AddFile, AddDir, LoadComponent},
+    components:{LoadComponent, FoldersCards, FilesCards, InfoFile, AddFile, AddDir},
 
     data() {
         return {
             
+            kFile:-1,
+            fileMove:{},
+            showSelectDir: false,
             indexAtualFile:-1,
             messageCaution:'',
             alertToYou:false,
@@ -345,7 +362,14 @@ export default {
 
             if(resp.error) return;
             
-            this.listFiles = resp.data;
+            let list = [];
+            this.listFiles = [];
+            for (let i = 0; i < resp.data.length; i++) {
+                const l = resp.data[i];
+                l.click = false;
+                this.listFiles.push(l);
+            }
+
             this.atualizarLista++;
             this.showList = true;
             this.loadFiles = false;
@@ -354,6 +378,8 @@ export default {
         go_to(value){
             
             if(this.loadFiles) return;
+            if(this.path == value) return;
+           
             this.loadFiles = true;
 
             let dirs = [];
@@ -372,6 +398,7 @@ export default {
 
         onclickFolder(k){
             this.dirsAtual.push(this.listFiles[k]);
+            this.hideDataFileInfo();
             this.go_to(this.listFiles[k].hashId)
         },
 
@@ -423,6 +450,12 @@ export default {
             if(action == 'excluir_file'){
                 this.messageCaution = "Tem certerza que quer excluir este arquivo?"
                 this.alertToYou = true;
+            }
+
+            if(action == 'mover'){
+                this.kFile = k
+                this.fileMove = this.listFiles[k]
+                this.showSelectDir = true
             }
         },
 

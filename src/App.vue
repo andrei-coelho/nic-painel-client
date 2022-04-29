@@ -43,8 +43,8 @@ export default {
     },
 
     onRestart(){
-      this.component = 'LoadingPage';
-      this.start_app()
+      location.reload();
+      return false;
     }
 
   },
