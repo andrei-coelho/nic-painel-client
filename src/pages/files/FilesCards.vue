@@ -34,11 +34,11 @@
                                         <v-icon>mdi-download</v-icon>
                                         <v-list-item-title>baixar</v-list-item-title>
                                     </v-list-item>
-                                    <v-list-item @click="file.click = false;fileAction('mover', k)">
+                                    <v-list-item v-show="file.options" @click="file.click = false;fileAction('mover', k)">
                                         <v-icon>mdi-cursor-move</v-icon>
                                         <v-list-item-title>mover</v-list-item-title>
                                     </v-list-item>
-                                    <v-list-item @click="file.click = false;fileAction('excluir_file', k)">
+                                    <v-list-item v-show="file.options" @click="file.click = false;fileAction('excluir_file', k)">
                                         <v-icon>mdi-delete-forever</v-icon>
                                         <v-list-item-title>excluir</v-list-item-title>
                                     </v-list-item>
@@ -160,13 +160,7 @@ export default {
 
         fileAction(action, k){
             // excluir / mover / baixar
-            if(action == 'baixar'){
-                // pegar o link para dowload
-                window.open('https://uceeba2268511d0e505a81d5b678.dl.dropboxusercontent.com/cd/0/get/BkGwfKpxINdgNRnMmi_iq-g-Fz9ktXcv2JK48Pn4RZUj7BqM1GOZuq56y7T1vjSZWcTrR2RBJiLDPVaooTQDVFgMJUeL4SSPffoVfqWlIqcRolWtqiypuifY7EX7aQoiMZ8fyv8vp63WdzJ-Kn1ilNKmnA1_aMCABPohzn4Qz53W6kl4O8y2TJzxXzgC52cn0-E/file')
-            }
-
             this.$emit('fileActionEvent', k, action)
-
         },
 
         onDrop(event, k){

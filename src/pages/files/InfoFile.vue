@@ -117,6 +117,33 @@
         
         <v-divider></v-divider>
         
+        <v-col cols="12">
+
+             <v-btn
+                v-show="!file.publico"
+                tile
+                color="success"
+                @click="actionFile('publicar')"
+                >
+                <v-icon left>
+                    mdi-publish
+                </v-icon>
+                    PUBLICAR
+            </v-btn>
+            <v-btn
+                v-show="file.publico"
+                tile
+                color="error"
+                @click="actionFile('ocultar')"
+                >
+                <v-icon left>
+                    mdi-alert-circle
+                </v-icon>
+                    OCULTAR
+            </v-btn>
+
+        </v-col>
+
     </div>
     
 </template>
@@ -199,6 +226,16 @@ export default {
             if(resp.error) return;
             this.showEditNome = false;
             this.$emit('fileNameEdited', this.keyO, this.file.hashId, this.valueName)
+        },
+
+        async actionFile(type){
+            let val = type == 'publicar' ? 1 : 0;
+            let res = await this.$request('client@files/publish_file', {
+                hash_file:this.file.hashId,
+                val:val      
+            })
+            if(res.error) return 
+            this.file.publico = val == 1;
         }
     },
     updated() {

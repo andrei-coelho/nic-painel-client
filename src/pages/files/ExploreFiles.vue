@@ -457,6 +457,21 @@ export default {
                 this.fileMove = this.listFiles[k]
                 this.showSelectDir = true
             }
+
+            if(action == 'baixar'){
+                let fileTemp = this.listFiles[k];
+                if(fileTemp.type == 'file')
+                    this.downloadFile(fileTemp.hashId)
+            }
+            
+        },
+
+        async downloadFile(hashId){
+            let resp = await this.$request('client@files/get_link', {
+                hash_file : hashId
+            })
+            if(!resp.error)
+            window.open(resp.data.link, '_blank')
         },
 
         async excluirArquivo(){

@@ -40,6 +40,8 @@ export default {
 
         function request__genResponse(response){
             
+            console.log(response);
+
             const isObj = ___is_object(objApp);
 
             if(response.error && (response.code == 440 || response.code == 401)){
@@ -115,41 +117,149 @@ export default {
             return url + module +'/'+session+'/'+client_path+'/'+file;
         }
 
-        app.config.globalProperties.$upload = async function(route, file, data = {}, callbackS = null, callbackE) {
+        async function request____save_file(url, data, callbackE, onLoad){
+            
+            data.flag = 'save';
+            if(onLoad) onLoad(100);
+            
+            const response = await fetch(url, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(res => res)
+            .catch((error) => {
+                if(callbackE)
+                callbackE(error)
+            });
+            
+            return response;
+        }
+
+        async function request____create_ghost_file(url, data, callbackE){
+            data.flag = "create";
+            const response = await fetch(url, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(res => res)
+            .catch((error) => {
+                if(callbackE)
+                callbackE(error)
+            });
+            return !response.error ? response.data.hashId : false;
+        }
+
+        async function request____append_file(url, data, callbackE){
+            data.flag = "append";
+            const response = await fetch(url, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(res => res)
+            .catch((error) => {
+                if(callbackE)
+                callbackE(error)
+            });
+            return !response.error;
+        }
+
+        async function request____commit_file(url, data, callbackE){
+            data.flag = "commit";
+            const response = await fetch(url, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(res => res)
+            .catch((error) => {
+                if(callbackE)
+                callbackE(error)
+            });
+            return response;
+        }
+
+        app.config.globalProperties.$upload = async function(route, file, data = {}, callbackS = null, callbackE, onLoad) {
 
             if(!session) return;
             
+            data.hashId  = "";
             data.session = session; 
+
             let parts = file.name.split('.');
             data.mime = parts[parts.length -1];
             data.name = file.name.substring(0, file.name.length - (data.mime.length + 1));
-            
 
             var reader = new FileReader();
             
+            reader.addEventListener('error', e => {
+                callbackE("O arquivo é muito grande para fazer upload.")
+            })
+
             reader.onload = async e => {
                 
-                data.file = e.target.result;
-
-                console.log(data);
-                
+                const file = e.target.result;
+                let size = file.length;
                 var status = true;
-
                 const url = url_api+route;
-                const response = await fetch(url, {
-                    method: 'POST',
-                    body: JSON.stringify(data)
-                })
-                .then(res => res.json())
-                .then(res => res)
-                .catch((error) => {
-                    status = false;
-                    if(callbackE)
-                    callbackE(error)
-                });
+                var response;
+                const max = 7864320;
 
-                if(status)
-                request__genResponse(response)
+                if(size > max){
+                    
+                    data.file = "";
+                    const content = file.split(";")[1].split(",")[1]
+                    size = content.length;
+                    let parts  = Math.ceil(size / max);
+                    let step   = 0;
+                    let partIn = 0;
+                    let init   = true;
+                    let quebra = max;
+
+                    let nextBrak = quebra;
+
+                    while(partIn < size){
+
+                        if(init) {
+                            data.hashId = await request____create_ghost_file(url, data, callbackE);
+                            if(!data.hashId) {
+                                status = false;
+                                break;
+                            }
+                            init = false;
+                            continue;
+                        }
+                        
+                        nextBrak  = nextBrak > size ? size : partIn+quebra;
+                        data.file = content.substring(partIn, nextBrak)
+
+                        let s_append = await request____append_file(url, data, callbackE)
+                        if(!s_append) {
+                            status = false;
+                            break;
+                        }
+
+                        step++;
+                        const porcent = Math.ceil((step / parts) * 100);
+                        if(onLoad) onLoad(porcent);
+                        partIn = nextBrak;
+                        
+                    }
+
+                    if(status)
+                       response = await request____commit_file(url, data);
+                    
+                } else {
+                    data.file = file
+                    response = await request____save_file(url, data, callbackE, onLoad)
+                }
+
+                if(response){
+                    status = true;
+                    request__genResponse(response)
+                }
                 // pare de mostrar o upload
                 if(status && callbackS) callbackS(response);
             };

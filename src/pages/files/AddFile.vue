@@ -82,7 +82,8 @@
                 <v-card-text class="text-white">
                     upload de arquivos: {{ index }} de {{ filesToUp.length }}
                     <v-progress-linear
-                        indeterminate
+                        :indeterminate="false"
+                        :model-value="porcent"
                         color="white"
                         class="mb-0"
                     ></v-progress-linear>
@@ -104,6 +105,8 @@ export default {
 
     data() {
         return {
+            porcent:0,
+            indeterminate:true,
             snackbarerror:false,
             snackbarsuccess:false,
             errorStr:'',
@@ -125,16 +128,29 @@ export default {
         },
 
         async uploadFile(){
-            if(!this.filesToUp) return;
+            if(this.filesToUp.length == 0) return;
             this.dialogLoading = true;
-            console.log(this.hash_dir);
             for (let i = 0; i < this.filesToUp.length; i++) {
                 const file = this.filesToUp[i];
-                await this.$upload('client@files/save_file', file, {hash_dir:this.hash_dir}, this.onResponseUpload, this.onResponseError);
+                await this.$upload(
+                    'client@files/save_file', 
+                    file, 
+                    {hash_dir:this.hash_dir}, 
+                    this.onResponseUpload, 
+                    this.onResponseError, 
+                    this.onResponseLoad
+                );
             }
         },
 
+        onResponseLoad(porcent){
+            this.porcent = porcent
+            this.indeterminate = false;
+        },
+
         removeLoad(){
+            this.porcent = 0;
+            this.indeterminate = true;
             this.dialogLoading = false;
             this.filesToUp = [];
             this.responses = 0;
@@ -142,6 +158,8 @@ export default {
         },
 
         onResponseUpload(response){
+            this.porcent = 0;
+            this.indeterminate = true;
             this.responses++;
             this.index++;
             if(response.code == 200) 
@@ -149,10 +167,9 @@ export default {
         },
 
         onResponseError(error){
-            console.log(error);
             this.removeLoad();
-            this.errorStr= error;
-            this.showAlert('Ocorreu um erro ao tentar gravar um ou mais arquivos no servidor. O servidor pode estar fora do ar ou em manutenção. Por favor, tente novamente mais tarde.', 'error')
+            this.errorStr = error;
+            this.showAlert('', 'error')
         },
 
         showAlert(message, type = 'success'){
@@ -160,6 +177,7 @@ export default {
             this['snackbar'+type] = true;
         }
     },
+
     watch:{
         responses(){
             if(this.responses == this.filesToUp.length){
