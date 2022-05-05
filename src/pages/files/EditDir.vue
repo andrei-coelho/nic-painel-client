@@ -37,7 +37,7 @@
         <v-card class="py-5"  style="width: 100%;">
             
             <v-card-title>
-                <span class="text-h5">Nova Pasta</span>
+                <span class="text-h5">Alterar Nome da Pasta</span>
             </v-card-title>
 
             <v-card-text>
@@ -52,7 +52,7 @@
                     flat
                     color="info"
                     class="mx-auto d-block"
-                    @click="criarPasta()"
+                    @click="editarPasta()"
                 >salvar</v-btn>
             </v-card-text>
 
@@ -67,7 +67,7 @@
                 dark
             >
                 <v-card-text class="text-white">
-                    Criando pasta...
+                    Editando pasta...
                     <v-progress-linear
                         indeterminate
                         color="white"
@@ -82,9 +82,9 @@
 <script>
 export default {
     props:{
-        dir:{
-            String
-        }
+        dir:{ String },
+        nome:{ String },
+        chave:{ Number }
     },
     data() {
         return {
@@ -93,42 +93,34 @@ export default {
             errorStr:'',
             errorCode:500,
             message:'',
-            dir_name:'',
+            k: this.chave,
+            dir_name:this.nome,
             dialogLoading: false,
             hash_dir:this.dir
         }
     },
+
     methods: {
-        async criarPasta(){
-            
+        async editarPasta(){
             if(!this.dir_name) return;
 
             this.dialogLoading = true;
 
-            let resp = await this.$request('client@files/add_folder', {
+            let resp = await this.$request('client@files/edit_dir_name', {
                 hash_dir:this.hash_dir,
-                name:this.dir_name
+                dir_name:this.dir_name
             });
 
             if(resp.code == 200){
-                this.$emit('listChanged', [resp.data])
+                this.$emit('listChanged', this.dir_name, this.k)
             } else {
                 this.errorCode = resp.code;
                 this.errorStr  = resp.message;
-                this.showAlert("Não foi possível criar o diretório.", 'error')
+                this.showAlert("Não foi possível editar o diretório.", 'error')
             }
             this.dialogLoading = false;
-                
-        },
-
-        removeLoad(){
-            this.dialogLoading = false;
-        },
-
-        showAlert(message, type = 'success'){
-            this.message = message;
-            this['snackbar'+type] = true;
         }
     },
+
 }
 </script>

@@ -96,6 +96,10 @@
                                         <v-icon>mdi-cursor-move</v-icon>
                                         <v-list-item-title>mover</v-list-item-title>
                                     </v-list-item>
+                                    <v-list-item @click="file.click = false;fileAction('editar', k)">
+                                        <v-icon>mdi-pencil</v-icon>
+                                        <v-list-item-title>editar</v-list-item-title>
+                                    </v-list-item>
                                     <v-list-item @click="file.click = false;fileAction('excluir_dir', k); ">
                                         <v-icon>mdi-delete-forever</v-icon>
                                         <v-list-item-title>excluir</v-list-item-title>
@@ -159,7 +163,7 @@ export default {
         },
 
         fileAction(action, k){
-            // excluir / mover / baixar
+            // excluir / mover / baixar / editar
             this.$emit('fileActionEvent', k, action)
         },
 

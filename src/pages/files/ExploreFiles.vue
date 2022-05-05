@@ -50,6 +50,10 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
+
+        <v-dialog v-model="showFormEditDir">
+            <EditDir :dir="hashDirSelected" :chave="indexAtualFile" :nome="nameDirSelected" :key="keyAddFormDir" @listChanged="editObjOnList" />
+        </v-dialog>
      
         <v-dialog
             v-model="showFormAddFile"
@@ -278,6 +282,27 @@
             
         </v-row>
 
+        <v-row>
+            <v-col cols="12" style="min-height: 100px;">
+
+            </v-col>
+        </v-row>
+
+        <v-row class="border" 
+                style="
+                position:fixed; 
+                bottom: 20px; 
+                background-color:white;
+                ">
+            <v-col style="width: 200px;">
+                <h5>Espaço Usado:</h5>
+                <v-progress-linear 
+                :color="colorProgressFilesPorcent"
+                :model-value="porcentUsed"></v-progress-linear>
+                <h5>{{ porcentUsed }}% <span class="text-caption text-info"> {{ strUsed }} - {{ maxGiga}}GB</span></h5>
+            </v-col>
+        </v-row>
+
     </div>
 </template>
 
@@ -286,16 +311,26 @@ import LoadComponent from '../../components/LoadComponent.vue'
 import FoldersCards from './FoldersCards.vue'
 import FilesCards from './FilesCards.vue'
 import InfoFile from './InfoFile.vue'
+import EditDir from './EditDir.vue'
 import AddFile from './AddFile.vue'
 import AddDir from './AddDir.vue'
 
 export default {
 
-    components:{LoadComponent, FoldersCards, FilesCards, InfoFile, AddFile, AddDir},
+    components:{LoadComponent, FoldersCards, FilesCards, InfoFile, AddFile, AddDir, EditDir},
 
     data() {
         return {
             
+            colorProgressFilesPorcent:'info',
+            strUsed:'',
+            maxGiga:0,
+            porcentUsed:0,
+            usedBytes:0,
+            maxBytes:0,
+            hashDirSelected:'',
+            showFormEditDir:false,
+            nameDirSelected:'',
             kFile:-1,
             fileMove:{},
             showSelectDir: false,
@@ -337,6 +372,8 @@ export default {
 
     created() {
 
+        this.atualizarInfoDeArquivo();
+
         document.addEventListener("scroll", e => {
             this.fixOnTop = window.pageYOffset > 100
             this.heightInfo = window.pageYOffset > 100 ? '97%' : '80%';
@@ -352,6 +389,36 @@ export default {
 
     methods: {
 
+        async atualizarInfoDeArquivo(initial = true){
+            
+            if(initial){
+                let resp = await this.$request('client@files/get_files_info');
+                if(!resp.error){
+                    this.usedBytes = resp.data.used;
+                    this.maxBytes  = resp.data.max;
+                    this.atualizarInfoDeArquivo();
+                }
+            }
+
+            this.porcentUsed = Math.ceil((this.usedBytes * 100) / this.maxBytes);
+            this.maxGiga = Math.ceil(this.maxBytes / 1073741824);
+        
+            if(this.porcentUsed > 70) this.colorProgressFilesPorcent = "error";
+
+            if(this.usedBytes > 1073741824){
+                this.strUsed = (Math.floor(this.usedBytes / 1073741824)) + "GB";
+            } else 
+            if(this.usedBytes > 1048576){
+                this.strUsed = (Math.floor(this.usedBytes / 1048576)) + "MB";
+            }else 
+            if(this.usedBytes > 1024){
+                this.strUsed = (Math.floor(this.usedBytes / 1024)) + "KB";
+            } else {
+                this.strUsed = Math.floor(this.usedBytes) + "bytes";
+            }
+
+        },
+
         async generate_list(){
             
             this.showList = false;
@@ -362,7 +429,6 @@ export default {
 
             if(resp.error) return;
             
-            let list = [];
             this.listFiles = [];
             for (let i = 0; i < resp.data.length; i++) {
                 const l = resp.data[i];
@@ -402,14 +468,25 @@ export default {
             this.go_to(this.listFiles[k].hashId)
         },
 
+        editObjOnList(nome, k){
+            setTimeout(e => {
+                this.showFormAddDir  = false;
+                this.showFormAddFile = false;
+                this.showFormEditDir = false;
+            }, 500)
+            this.listFiles[k].nome = nome;
+        },
+
         setNewObjcOnList(objs){
             setTimeout(e => {
-                this.showFormAddDir = false;
+                this.showFormAddDir  = false;
                 this.showFormAddFile = false;
-            }, 300)
+                this.showFormEditDir = false;
+            }, 500)
 
             for (let i = 0; i < objs.length; i++) {
                 const obj = objs[i];
+                this.atualizarInfoDeArquivo();
                 this.listFiles.unshift(obj);
             }
         },
@@ -441,6 +518,12 @@ export default {
 
         onFileAction(k, action){
             this.indexAtualFile = k;
+
+            if(action == 'editar'){
+                this.hashDirSelected = this.listFiles[k].hashId;
+                this.nameDirSelected = this.listFiles[k].nome;
+                this.showFormEditDir = true;
+            }
 
             if(action == 'excluir_dir'){
                 this.messageCaution = 'Ao excluir a pasta, todos os arquivos e subpastas contidos nela serão apagados. Tem certeza que quer fazer isso?'
@@ -481,6 +564,7 @@ export default {
                 type: file.type
             });
             if(resp.error) return;
+            this.atualizarInfoDeArquivo();
             this.listFiles.splice(this.indexAtualFile,1);
             this.alertToYou = false;
         },
