@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-import FilesListFiles from '../pages/files/ListFile.vue'
+import FilesListPublicFiles from '../pages/files/ListPublicFiles.vue'
 import ExploreFiles from '../pages/files/ExploreFiles.vue'
 import FilesAddFiles from '../pages/files/AddFile.vue'
 
@@ -8,7 +8,7 @@ const router = createRouter({
     routes:[
         {
             path:'/',
-            component: FilesListFiles
+            component: FilesListPublicFiles
         },
         {
             path:'/files@explore_files',
@@ -16,11 +16,7 @@ const router = createRouter({
         },
         {
             path:'/files@list_files',
-            component: FilesListFiles
-        },
-        {
-            path:'/files@add_file',
-            component: FilesAddFiles
+            component: FilesListPublicFiles
         }
     ],
     history:createWebHistory()

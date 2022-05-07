@@ -92,7 +92,7 @@
 
             <v-col :lg="infoArea.cols">
                 <v-row class="pt-1">
-                    <v-col md="2">
+                    <v-col cols="2" md="3">
 
                         <v-menu v-model="drawer">
                             <template v-slot:activator="{ props }">
@@ -100,7 +100,7 @@
                                     prepend-icon="mdi-plus-box-outline"
                                     v-bind="props"
                                 flat>
-                                    Adicionar
+                                    <span class="d-none d-md-block">Adicionar</span>
                                 </v-btn>
                             </template>
 
@@ -117,14 +117,42 @@
                         </v-menu>
                     </v-col>
 
-                    <v-col md="2">
-                        <v-btn 
-                            prepend-icon="mdi-magnify"
-                            @click="showSearch = !showSearch"
-                        flat></v-btn>
+                    <v-col cols="6" md="4" class="pb-0">
+                        <v-text-field
+                                v-model="key_word"
+                                density="compact"
+                                prepend-inner-icon="mdi-magnify" 
+                                placeholder="Buscar"
+                                variant="underlined"
+                                @keyup.enter="search()"
+                            ></v-text-field>
+                        
+                    </v-col>
+                    <v-col cols="4" md="3" class="pb-0">
+                        <v-btn
+                            v-show="!searched"
+                            color="info"
+                            size="small"
+                            class="ma-0 mt-2"
+                            @click="search()"
+                            flat>
+                            buscar
+                        </v-btn>
+                        <v-btn
+                            v-show="searched"
+                            class="mt-2"
+                            size="small"
+                            color="error"
+                            @click="clear()"
+                            flat
+                        >
+                            <v-icon dark>
+                                mdi-close
+                            </v-icon>
+                        </v-btn>
                     </v-col>
 
-                    <v-col md="8" class="d-none d-md-block">
+                    <v-col md="2" class="d-none d-md-block">
                         <!--
                         <v-menu :anchor="anchor" >
 
@@ -177,56 +205,10 @@
                     
                 </v-row>
 
-                <div v-if="showSearch">
-                    
-                    <v-divider></v-divider>
-                    
-                    <v-row>
-                        
-                       <v-col cols="12" md="7">
-                            <v-text-field
-                                density="compact"
-                                class="mt-3"
-                                prepend-inner-icon="mdi-magnify" 
-                                hide-details="auto"
-                                dense="true"
-                            ></v-text-field>
-                            <v-checkbox
-                                density="compact"
-                                class="ma-0 pa-0"
-                                label="Bucar em todas as pastas"
-                                color="indigo"
-                                value="indigo"
-                                small
-                                hide-details
-                            ></v-checkbox>
-                       </v-col>
-
-                       <v-col cols="12" md="5">
-                            <v-btn
-                                color="info"
-                                small
-                                class="ma-0 mt-2"
-                                flat>
-                                buscar
-                            </v-btn>
-                            <v-btn
-                                icon="mdi-close-box"
-                                flat
-                                class="float-right"
-                                @click="showSearch = !showSearch"
-                            >
-                            </v-btn>
-                           
-                       </v-col>
-
-                    </v-row>
-                </div>
-
                 <v-divider></v-divider>
 
                 <v-row>
-                    <v-col cols="12" v-show="showList">
+                    <v-col cols="12" v-if="showList">
                         <FilesCards 
                             @clickFolderEvent="onclickFolder" 
                             @clickFileEvent="onclickFile" 
@@ -236,7 +218,7 @@
                             :exibition="exibition" 
                             :key="atualizarLista"/>
                     </v-col>
-                    <v-col cols="12" v-show="!showList">
+                    <v-col cols="12" v-else-if="!showList">
                         <LoadComponent />
                     </v-col>
                 </v-row>
@@ -322,6 +304,8 @@ export default {
     data() {
         return {
             
+            key_word:'',
+            searched:false,
             colorProgressFilesPorcent:'info',
             strUsed:'',
             maxGiga:0,
@@ -389,6 +373,38 @@ export default {
 
     methods: {
 
+        async loadFilesAll(search = ""){
+
+            this.showList = false;
+
+            let res = false;
+            if(search != ""){
+                res = await this.$request('client@files/search_all_files', {
+                    key_word:search
+                });
+                if(res && !res.error){
+                    this.listFiles = res.data
+                }
+            } else {
+                this.path = ''
+                this.generate_list()
+                //res = await this.$request('client@files/list_all_files');
+            }
+
+            this.showList = true;
+        },
+
+        search(){
+            this.loadFilesAll(this.key_word)
+            this.searched = true
+        },
+
+        clear(){
+            this.loadFilesAll()
+            this.key_word = ''
+            this.searched = false
+        },
+
         async atualizarInfoDeArquivo(initial = true){
             
             if(initial){
@@ -396,7 +412,6 @@ export default {
                 if(!resp.error){
                     this.usedBytes = resp.data.used;
                     this.maxBytes  = resp.data.max;
-                    this.atualizarInfoDeArquivo();
                 }
             }
 
@@ -486,9 +501,9 @@ export default {
 
             for (let i = 0; i < objs.length; i++) {
                 const obj = objs[i];
-                this.atualizarInfoDeArquivo();
                 this.listFiles.unshift(obj);
             }
+            this.atualizarInfoDeArquivo();
         },
 
         hideDataFileInfo(){
@@ -540,21 +555,7 @@ export default {
                 this.fileMove = this.listFiles[k]
                 this.showSelectDir = true
             }
-
-            if(action == 'baixar'){
-                let fileTemp = this.listFiles[k];
-                if(fileTemp.type == 'file')
-                    this.downloadFile(fileTemp.hashId)
-            }
             
-        },
-
-        async downloadFile(hashId){
-            let resp = await this.$request('client@files/get_link', {
-                hash_file : hashId
-            })
-            if(!resp.error)
-            window.open(resp.data.link, '_blank')
         },
 
         async excluirArquivo(){
@@ -578,6 +579,7 @@ export default {
 
         changeExibition(slug){
             switch (slug) {
+                
                 case 'pequeno':
                     this.exibition = {
                         md: 2,
@@ -605,6 +607,14 @@ export default {
             }
         }
     },
+    watch:{
+        key_word(value){
+            if(value == ""){
+                this.loadFilesAll()
+                this.searched = false;
+            }
+        }
+    }
 }
 </script>
 

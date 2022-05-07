@@ -44,7 +44,7 @@
             <p>{{ file.status }}</p>
             <span class="text-grey">criado por: </span><span class="text-info">{{ fileDetailObj.createdBy }}</span><br>
             <span class="text-grey">criado em:  </span><span class="text-black">{{ fileDetailObj.createdAt }}</span><br>
-            <span class="text-grey">editado em: </span><span class="text-black">{{ fileDetailObj.editedAt }}</span>
+            <span class="text-grey">tamanho: </span><span class="text-black">{{ size }}</span>
         </v-col>
         <!-- 
         <v-divider></v-divider>
@@ -154,6 +154,7 @@ export default {
     async mounted() {
         this.getDetails();
         this.getTags();
+        this.genSize();
     },
     
     props:{
@@ -170,6 +171,7 @@ export default {
             valueName: this.fileInfo.nome,
             keyO:this.keyObj,
             valueTag: '',
+            size:'',
             tags:[]
         }
     },
@@ -236,6 +238,21 @@ export default {
             })
             if(res.error) return 
             this.file.publico = val == 1;
+        },
+
+        genSize(){
+            if(this.file.size > 1073741824){
+                this.size = (Math.floor(this.file.size / 1073741824)) + "GB";
+            } else 
+            if(this.file.size > 1048576){
+                this.size = (Math.floor(this.file.size / 1048576)) + "MB";
+            }else 
+            if(this.file.size > 1024){
+                this.size = (Math.floor(this.file.size / 1024)) + "KB";
+            } else {
+                this.size = Math.floor(this.file.size) + "bytes";
+            }
+
         }
     },
     updated() {

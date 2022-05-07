@@ -30,7 +30,7 @@
 
                                 <v-list density="compact" elevation="5" 
                                     >
-                                    <v-list-item @click="file.click = false; fileAction('baixar', k)">
+                                    <v-list-item @click="file.click = false; downloadFile(file.hashId)">
                                         <v-icon>mdi-download</v-icon>
                                         <v-list-item-title>baixar</v-list-item-title>
                                     </v-list-item>
@@ -163,7 +163,7 @@ export default {
         },
 
         fileAction(action, k){
-            // excluir / mover / baixar / editar
+            // excluir / mover / editar
             this.$emit('fileActionEvent', k, action)
         },
 
@@ -181,6 +181,14 @@ export default {
             event.dataTransfer.dropEffect = 'move'
             event.dataTransfer.effectAllowed = 'move'
             event.dataTransfer.setData('keyItem', k)
+        },
+
+        async downloadFile(hashId){
+            let resp = await this.$request('client@files/get_link', {
+                hash_file : hashId
+            })
+            if(!resp.error)
+            window.open(resp.data.link, '_blank')
         },
 
     },
