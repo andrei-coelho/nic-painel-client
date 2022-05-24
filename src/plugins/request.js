@@ -26,6 +26,7 @@ export default {
         }
 
         function request__resetCookie(){
+            // domain=http://localhost:3000/;
             document.cookie = `${options.session_name}=; Max-Age=-99999999; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
         }
 
@@ -39,8 +40,6 @@ export default {
         }
 
         function request__genResponse(response){
-            
-            console.log(response);
 
             const isObj = ___is_object(objApp);
 
@@ -90,6 +89,9 @@ export default {
             })
             .then(res => res.json())
             .then(res => res);
+
+            console.log(route, response);
+            //await new Promise(resolve => setTimeout(resolve, 10000));
             
             request__genResponse(response); 
             return response;

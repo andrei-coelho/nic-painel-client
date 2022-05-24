@@ -18,7 +18,13 @@
         <v-divider></v-divider>
 
         <v-list class="text-white" style="background-color: #4087F3" density="compact" nav>
-            <v-list-item v-for="page,k in pages" :active="page.active" :key="k" :title="page.nome" :value="page.slug" class="white" @click="changePage(k)">
+            <v-list-item v-for="page,k in pages" 
+                :active="page.active" 
+                :key="k" :title="page.nome" 
+                :value="page.slug" 
+                :to="'/'+page.slug+'@'+page.subpages[0].slug"
+                class="white" 
+                @click="changePage(k)">
                 <template  v-slot:prepend>        
                     <v-icon class="ma-2" color="white"> {{page.icon}} </v-icon> 
                 </template>
@@ -57,16 +63,19 @@ export default {
         changePage(key){
             if(key == this.keyActive) return;
             this.changeActiveItem(key)
-            this.$emit('changePageAction', this.keyActive)
+            this.$emit('changePageAction', this.keyActive,
+                this.pagesA[this.keyActive].slug+'@'+
+                this.pagesA[this.keyActive].subpages[0].slug)
         }
     },
 
     updated(){
         if(!this.pagesA) return;
         if(this.pagesA.length == 0)
-        this.pagesA = this.pages;
+        this.pagesA = this.pages ? this.pages : [];
         this.changeActiveItem(0);
-        this.$emit('changePageAction', 0)
+        if(this.pagesA.length > 0)
+        this.$emit('changePageAction', 0, this.pagesA[this.keyActive].subpages[0].slug)
     },
 }
 </script>

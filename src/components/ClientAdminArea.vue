@@ -21,7 +21,7 @@
                 style="left: 70px;  z-index:99;"
                 fixed
             >
-                <SubMenu :service="pageSlug" :subpages="subpages" @changeSubpageAction="changeSubpageListener"/>
+                <SubMenu :key="reload" :service="pageSlug" :subpages="subpages" @changeSubpageAction="changeSubpageListener"/>
             </v-col>
 
             <v-col
@@ -44,7 +44,12 @@
         <v-row >
             <div style="width:140px" class="d-none d-lg-block "></div>
             <v-col class="ps-lg-3">
-                <PageComponent :routes="routesUser" :route="routeActive" @showSnackBar="showSnackBarMessage"/>
+                <PageComponent 
+                    :routes="routesUser" 
+                    :route="routeActive"
+                    @pageLoad="onPageLoad"
+                    @showSnackBar="showSnackBarMessage"
+                />
             </v-col>
         </v-row>
 
@@ -127,6 +132,8 @@ export default {
     data() {
         return {
 
+            reload:0,
+
             user:null,
             pages:null,
             subpages: [],
@@ -151,6 +158,7 @@ export default {
             this.messageError = `Erro: ${code} - ${message}`;
             this.snackbarError = true;
         },
+
         showApiSuccess(message){
             this.messageSuccess = message;
             this.snackbarSuccess = true;    
@@ -168,16 +176,17 @@ export default {
             }
         },
 
-        changePageListener(key){
-            if(this.pages && this.pages.length > 0){
-                this.subpages = this.pages[key].subpages;
-                this.pageSlug = this.pages[key].slug;
-            }
+        changePageListener(key, route){
+            this.pageSlug    = this.pages[key].slug;
+            this.subpages    = this.pages[key].subpages;
+            this.routeActive = route
+            this.reload++;
         },
-        changeSubpageListener(key){
-            this.subpageSlug = this.pages[this.pageKey].subpages[key].slug;
-            this.routeActive = this.pageSlug+'@'+this.subpageSlug;
+
+        changeSubpageListener(route){
+            this.routeActive = route
         },
+
         changePageByTopListener(route){
             this.routeActive = route
         }

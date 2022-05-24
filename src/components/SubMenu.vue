@@ -40,6 +40,7 @@ export default {
 
     methods: {
         changeActiveItem(key, reload = false){
+            if(this.subpages.length == 0) return;
             if(reload){
                 for (let i = 0; i < this.subpages.length; i++) {
                     this.subpages[i].active = false;
@@ -54,13 +55,14 @@ export default {
         changeSubpage(key){
             if(key == this.keyActive) return;
             this.changeActiveItem(key)
-            this.$emit('changeSubpageAction', this.keyActive)
+            this.$emit('changeSubpageAction', this.service+'@'+this.subpages[key].slug)
         }
     },
 
     updated() {
+        console.log(this.subpages);
         this.changeActiveItem(0, true);
-        this.$emit('changeSubpageAction', 0)
+        this.$emit('changeSubpageAction', this.service+'@'+this.subpages[0].slug)
     },
 
 }

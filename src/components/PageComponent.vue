@@ -19,30 +19,41 @@ export default {
 
     components:{LoadComponent},
 
+    created() {
+        
+    },
+
     props:{
-        routes:Array,
-        route:String,
+        routes:Array
     },
     data() {
         return {
+            rotas:[],
+            rota:'',
             showPage:false
         }
     },
     methods: {
         checkUser(){
-            this.showPage = this.routes && this.route && this.routes.include(this.route)
+            this.showPage = this.rotas.includes(this.rota)
         },
         showAlert(message, type = 'success', code = 404){
             this.$emit('showSnackBar', message, type, code)
         }
     },
     updated() {
-        if(this.routes && this.routes.length > 0 && this.route){
-            this.showPage = this.routes && this.route && this.routes.includes(this.route)
-            console.log(this.route);
-            console.log( this.routes);
-            console.log(this.showPage);
+        
+        this.rotas = this.routes;
+        this.rota  = this.route;
+        
+        if(this.$route.path == '/'){
+            this.rota = this.rotas[0];
+            this.$router.push('/'+this.rota);
+        } else {
+            this.rota = this.$route.path.substr(1, this.$route.path.length)
         }
+        
+        this.showPage = this.rotas.includes(this.rota)
     },
 
 }

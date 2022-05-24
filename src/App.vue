@@ -13,6 +13,7 @@ import ClientAdminArea from './components/ClientAdminArea.vue'
 import LoadingPage from './components/LoadingPage.vue'
 
 export default {
+  
   name: 'App',
 
   created() {
@@ -37,6 +38,7 @@ export default {
       if(this.$has_session()){
         let status = await this.$request('@auth/refresh_user_client');
         this.component = status ? 'ClientAdminArea' : 'AuthArea';
+        this.$router.push('/');
       } else {
         this.component = 'AuthArea'
       }
