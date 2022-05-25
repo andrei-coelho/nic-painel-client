@@ -4,7 +4,7 @@
             <v-col cols="12">
                 <h1>Usuários</h1>
             </v-col>
-            <component :is="component" :list="usuarios" :edit="is_editor"/>
+            <component :is="component" @refresh="refresh" :slug="client_slug" :list="usuarios" :showEditor="is_editor"/>
         </v-row>
     </v-container>
 </template>
@@ -24,8 +24,8 @@ export default {
     data() {
         return {
             component:"Loading",
-            showEditor:true,
             is_editor:false,
+            client_slug:'',
             usuarios:[]
         }
     },  
@@ -37,8 +37,13 @@ export default {
             if(!res.error) {
                 this.is_editor = res.data.is_editor
                 this.usuarios = res.data.list
+                this.client_slug = res.data.client_slug
             }
             this.component = "CardsUser";
+        },
+
+        refresh(){
+            this.listar()
         }
     },
 }

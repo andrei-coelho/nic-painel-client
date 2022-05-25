@@ -110,6 +110,7 @@ export default {
 
     updated(){
         if(Object.keys(this.userObject).length === 0 && this.user){
+            console.log(this.user);
             this.userObject = this.user;
         }
     }
