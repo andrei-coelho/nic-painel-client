@@ -67,6 +67,9 @@
             <AddDir :dir="path" :key="keyAddFormDir" @listChanged="setNewObjcOnList"/>
         </v-dialog>
         <v-row>
+            <h3 class="py-4">Explorar Arquivos</h3>
+        </v-row>
+        <v-row>
             <div class="py-3 ps-5">
                 <v-icon>mdi-folder-open</v-icon>
             </div>

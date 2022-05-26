@@ -4,6 +4,7 @@ import FilesListPublicFiles from '../pages/files/ListPublicFiles.vue'
 import ExploreFiles from '../pages/files/ExploreFiles.vue'
 import ListUsers from '../pages/contas/ListUsers.vue'
 import AddUser from '../pages/contas/AddUser.vue'
+import Account from '../pages/AccountUser.vue'
 
 const router = createRouter({
     routes:[
@@ -22,6 +23,11 @@ const router = createRouter({
         {
             path:'/accounts@add_user',
             component: AddUser
+        },
+        ,
+        {
+            path:'/me',
+            component: Account
         }
     ],
     history:createWebHistory()

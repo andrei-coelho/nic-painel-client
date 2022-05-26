@@ -49,6 +49,7 @@
                     :route="routeActive"
                     @pageLoad="onPageLoad"
                     @showSnackBar="showSnackBarMessage"
+                    @actionCloseApp="closeApp"
                 />
             </v-col>
         </v-row>

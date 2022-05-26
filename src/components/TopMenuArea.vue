@@ -48,7 +48,7 @@
                     <v-divider></v-divider>
                     <v-list-item 
                         prepend-icon="mdi-pencil-box-outline"
-                        @click="edit"
+                        to="/me"
                     >
                         <v-list-item-header>
                             <v-list-item-title>Editar Informações</v-list-item-title>

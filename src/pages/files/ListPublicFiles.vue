@@ -1,5 +1,9 @@
 <template>
     <v-row>
+        <v-col cols="12">
+        <h3 class="py-0">Arquivos Publicados</h3>
+    </v-col>
+
         <v-col cols="12" md="7">
             <v-text-field
                 v-model="key_word"
@@ -34,7 +38,7 @@
         </v-col>
     </v-row>
     <v-divider></v-divider>
-
+    
     <div v-if="!isLoading">
         <FilesCards 
             :list="list" 

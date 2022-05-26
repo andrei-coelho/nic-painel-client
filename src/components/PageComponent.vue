@@ -2,7 +2,7 @@
     <v-container fuild>
         <div v-if="showPage">
             <v-container fuild>
-                <router-view @alert="showAlert"></router-view>
+                <router-view @alert="showAlert" @actionCloseApp="actionCloseApp"></router-view>
             </v-container>
         </div>
         <div v-else>
@@ -19,13 +19,10 @@ export default {
 
     components:{LoadComponent},
 
-    created() {
-        
-    },
-
     props:{
         routes:Array
     },
+
     data() {
         return {
             rotas:[],
@@ -33,17 +30,23 @@ export default {
             showPage:false
         }
     },
+    
     methods: {
         checkUser(){
             this.showPage = this.rotas.includes(this.rota)
         },
         showAlert(message, type = 'success', code = 404){
             this.$emit('showSnackBar', message, type, code)
+        },
+        actionCloseApp(){
+            this.$emit('actionCloseApp')
         }
     },
+    
     updated() {
         
         this.rotas = this.routes;
+        this.rotas.push('me');
         this.rota  = this.route;
         
         if(this.$route.path == '/'){
