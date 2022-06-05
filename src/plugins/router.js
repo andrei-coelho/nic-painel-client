@@ -5,6 +5,7 @@ import ExploreFiles from '../pages/files/ExploreFiles.vue'
 import ListUsers from '../pages/contas/ListUsers.vue'
 import AddUser from '../pages/contas/AddUser.vue'
 import Account from '../pages/AccountUser.vue'
+import ListPesquisasAtivas from '../pages/pesquisas/ListPesquisasAtivas.vue'
 
 const router = createRouter({
     routes:[
@@ -24,7 +25,10 @@ const router = createRouter({
             path:'/accounts@add_user',
             component: AddUser
         },
-        ,
+        {
+            path:'/pesquisas@list_pesquisas_ativas',
+            component: ListPesquisasAtivas
+        },
         {
             path:'/me',
             component: Account
