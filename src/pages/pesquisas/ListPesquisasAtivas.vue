@@ -12,7 +12,7 @@
             </v-col>
         </v-row>
         <div v-if="showList">
-            <ListComp :list="pesquisas" :editor="showBtns"/>
+            <ListComp :list="pesquisas" :editor="showBtns" @action="onAtcion"/>
         </div>
         <div v-else>
             <Loading />
@@ -24,11 +24,13 @@
 
 import Loading from '../../components/LoadComponent.vue'
 import ListComp from './ListComp.vue'
-import OpenComponent from './OpenComponent.vue'
+import EditComp from './EditComp.vue'
+import StatComp from './StatComponent.vue'
+import OpenComp from './OpenComponent.vue'
 
 export default {
 
-    components:{ListComp, Loading, OpenComponent},
+    components:{ListComp, Loading, OpenComp, EditComp, StatComp},
 
     created() {
         this.listar()
@@ -36,9 +38,9 @@ export default {
 
     data() {
         return {
-            component:"OpenComponent",
+            component:"OpenComp",
             showList:false,
-            showComp:true,
+            showComp:false,
             showBtns:false,
             dataSend:{titulo:'test', id:5},
             pesquisas:[]
@@ -50,12 +52,32 @@ export default {
             this.showComp = false
             this.listar()
         },
+        onAtcion(action, keyPesquisa){
+            let pesquisa = this.pesquisas[keyPesquisa];
+            switch (action) {
+                case 'open':
+                    this.dataSend  = pesquisa
+                    this.component = "OpenComp"
+                    this.showComp  = true
+                    break;
+                case 'edit':
+                    this.dataSend  = pesquisa
+                    this.component = "EditComp"
+                    this.showComp  = true
+                    break;
+                case 'stat':
+                    this.dataSend  = pesquisa
+                    this.component = "StatComp"
+                    this.showComp  = true
+                    break;
+            }
+        },
         async listar(){
-            this.showList = false
+            this.showList  = false
             let res = await this.$request('client@pesquisas/list_pesquisas');
             this.pesquisas = res.data.lista_pesquisas
             this.showBtns  = res.data.is_editor
-            this.showList = true
+            this.showList  = true
         }
     },
 }

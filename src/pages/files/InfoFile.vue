@@ -1,5 +1,5 @@
 <template>
-    <div style="width: 400px;">
+    <div style="width: 400px;" class="pb-10">
         <v-col cols="12">
             <img :src="file.thumb" class="" style="height: 150px;">
             

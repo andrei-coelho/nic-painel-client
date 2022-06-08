@@ -10,14 +10,15 @@
                     <p class="text-h5">
                         {{ pesquisa.titulo }}
                     </p>
-                    <p>{{ pesquisa.createdAt }}</p>
+                    <p>Iniciada em: {{ new Date(pesquisa.createdAt).toLocaleDateString('pt-br') }}</p>
+                    <p>Respostas: {{ pesquisa.respostas_total }}</p>
                 </v-card-text>
                 <v-card-actions >
                     <v-btn
                         variant="text"
                         color="info"
                         icon="mdi-book-open-page-variant"
-                        @click="open(k)"
+                        @click="_window('open', k)"
                     >
                     </v-btn>
                     <v-btn
@@ -25,7 +26,7 @@
                         variant="text"
                         color="info"
                         icon="mdi-lead-pencil"
-                        @click="edit(k)"
+                        @click="_window('edit', k)"
                     >
                     </v-btn>
                     <v-btn
@@ -33,7 +34,7 @@
                         variant="text"
                         color="info"
                         icon="mdi-chart-bar"
-                        @click="estats(k)"
+                        @click="_window('stat', k)"
                     >
                     </v-btn>
                 </v-card-actions>
@@ -52,6 +53,12 @@ export default {
         return {
             pesquisas:this.list,
             showBtns:this.editor
+        }
+    },
+
+    methods: {
+        _window(activ, key){
+            this.$emit('action', activ, key)
         }
     },
 }
