@@ -6,6 +6,8 @@ import ListUsers from '../pages/contas/ListUsers.vue'
 import AddUser from '../pages/contas/AddUser.vue'
 import Account from '../pages/AccountUser.vue'
 import ListPesquisasAtivas from '../pages/pesquisas/ListPesquisasAtivas.vue'
+import ListTodasPesquisas from '../pages/pesquisas/ListTodasPesquisas.vue'
+import AddPesquisa from '../pages/pesquisas/AddPesquisa.vue'
 
 const router = createRouter({
     routes:[
@@ -28,6 +30,14 @@ const router = createRouter({
         {
             path:'/pesquisas@list_pesquisas_ativas',
             component: ListPesquisasAtivas
+        },
+        {
+            path:'/pesquisas@list_pesquisas_all',
+            component: ListTodasPesquisas
+        },
+        {
+            path:'/pesquisas@add_pesquisa',
+            component: AddPesquisa
         },
         {
             path:'/me',

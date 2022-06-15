@@ -23,7 +23,7 @@
                 </v-badge>
             </v-btn>
 
-            <v-menu v-model="drawer" >
+            <v-menu v-model="drawer" location="start">
                 
                 <template v-slot:activator="{ props }">
                     <div
@@ -36,7 +36,7 @@
                     </div>
                 </template>
 
-                <v-list class="elevation-5 rounded-lg" lines="three" style="position:absolute; right:0;">
+                <v-list class="elevation-5 rounded-lg" lines="three" style="right:0;">
                     <v-list-subheader>Controles do Usuário</v-list-subheader>
                     <v-divider></v-divider>
                     <div class="px-5 py-2" >
@@ -110,7 +110,6 @@ export default {
 
     updated(){
         if(Object.keys(this.userObject).length === 0 && this.user){
-            console.log(this.user);
             this.userObject = this.user;
         }
     }

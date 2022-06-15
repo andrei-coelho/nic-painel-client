@@ -16,7 +16,7 @@
                         <v-col cols="6">
                             <v-menu 
                                 v-model="file.click"
-                                anchor="start"
+                                location="start"
                                 close-on-click="true"
                             >
                                 <template v-slot:activator="{ props }">

@@ -52,18 +52,22 @@
                                     <v-col cols="12" md="4" v-for="filter,k in filters" :key="k">
                                         <div v-if="filter.field != 'data' && filter.type == 'string'">
                                             <v-select
+                                                style="height: 100px;"
                                                 v-model="models[filter.field]"
                                                 :items="filter.options"
                                                 :label="filter.field"
                                                 variant="outlined"
+                                                menu-props="auto"
                                             ></v-select>
                                         </div>
-                                        <div v-else-if="filter.type == 'bool'">
+                                        <div v-else-if="filter.type == 'bool'" >
                                             <v-select
+                                                
                                                 v-model="models[filter.field]"
                                                 :items="['verdadeiro', 'falso']"
                                                 :label="filter.field"
                                                 variant="outlined"
+                                                menu-props="auto"
                                             ></v-select>
                                         </div>
                                         <div v-else-if="filter.field != 'data'">
@@ -279,6 +283,8 @@ export default {
                 fields: this.filters.filter(item => item.field != 'data').map(item => item.field)
             })
 
+            console.log(res);
+
             if(res.error) {
                 this.loadProfile = false
                 return;
@@ -293,7 +299,8 @@ export default {
                 
                 let backgrounds = [];
                 for (let x = 0; x < objArr.length; x++) {
-                    backgrounds.push(this.colors[x])                    
+                    backgrounds.push(this.colors[x])
+                    res.data[titulo][x].label = this.filter_label(titulo, objArr[x].label)
                 }
 
                 this.profileStats.push({
@@ -303,8 +310,26 @@ export default {
                     datas: objArr.map(item => item.total)
                 })
             }
+
+            
             
             this.loadProfile = false
+        },
+
+        filter_label: function(name, value){
+            if(name == 'salario'){
+                return value == 1 ? `até 1 salário mínimo` : `até ${value} salários mínimos`
+            }
+            if(name == 'casado'){
+                return value == 1 ? `sim` : `não`
+            }
+            if(name == 'idade'){
+                return `até ${value} anos`;
+            }
+            if(name == 'filhos'){
+                return value == 0 ? `nenhum` : `${value} filho${(value == 1 ? '': 's')}`
+            }
+            return value;
         },
 
         criarArrayFiltro(){
@@ -372,8 +397,16 @@ export default {
                 if(fil.field != 'data')
                     this.models[fil.field] = ''
             })
-            if(reload) this.gerarEstatistica()
+            if(reload) {
+                this.criarArrayFiltro()
+                this.gerarEstatisticaProfile()
+                this.gerarEstatistica()
+            }
         }
     },
+
+    computed:{
+        
+    }
 }
 </script>

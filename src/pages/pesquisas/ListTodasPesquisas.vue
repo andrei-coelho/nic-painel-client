@@ -9,7 +9,7 @@
         </v-dialog>
         <v-row>
             <v-col cols="12">
-                <h1>Pesquisas Ativas</h1>
+                <h1>Todas as Pesquisas</h1>
             </v-col>
         </v-row>
         <div v-if="showList">
@@ -78,7 +78,9 @@ export default {
 
         async listar(){
             this.showList  = false
-            let res = await this.$request('client@pesquisas/list_pesquisas');
+            let res = await this.$request('client@pesquisas/list_pesquisas', {
+                todas:1
+            });
             this.pesquisas = res.data.lista_pesquisas
             this.showBtns  = res.data.is_editor
             this.showList  = true

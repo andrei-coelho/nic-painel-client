@@ -24,30 +24,33 @@
                 </v-row>
 
                 <!-- PERFIL -->
-                <v-row>
-                    <v-col v-for="profile, k in formList.profile" :key="k" cols="12" md="4" lg="3">
+                <v-row >
+                    <v-col style="height: 100px;" v-for="profile, k in formList.profile" :key="k" cols="12" md="4" lg="3">
                         <div v-if="profile.type == 'string'">
                             <v-select
-                            v-model="profileValues[profile.field]"
-                            :items="profile.options"
-                            :label="profile.field"
-                            variant="outlined"
+                                v-model="profileValues[profile.field]"
+                                :items="profile.options"
+                                :label="profile.field"
+                                variant="outlined"
+                                menu-props="auto"
                             ></v-select>
                         </div>
                         <div v-else-if="profile.type == 'bool'">
                             <v-select
-                            v-model="profileValues[profile.field]"
-                            :items="['verdadeiro', 'falso']"
-                            :label="profile.field"
-                            variant="outlined"
+                                v-model="profileValues[profile.field]"
+                                :items="['verdadeiro', 'falso']"
+                                :label="profile.field"
+                                variant="outlined"
+                                menu-props="auto"
                             ></v-select>
                         </div>
                         <div v-else>
                             <v-text-field
-                            v-model="profileValues[profile.field]"
-                            :label="profile.field"
-                            variant="outlined"
-                        ></v-text-field>
+                                v-model="profileValues[profile.field]"
+                                :label="profile.field"
+                                variant="outlined"
+                                menu-props="auto"
+                            ></v-text-field>
                         </div>
                     </v-col>
                 </v-row>
@@ -61,7 +64,6 @@
                             variant="outlined"
                         ></v-text-field>
                    </v-col>
-                  
                 </v-row>
 
             </v-col>
