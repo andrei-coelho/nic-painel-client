@@ -1,6 +1,6 @@
 <template>
     
-    <v-row>
+    <v-row style="">
         <v-snackbar
             v-model="snackbarerror"
             color="red"

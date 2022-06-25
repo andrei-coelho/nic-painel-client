@@ -57,15 +57,32 @@
      
         <v-dialog
             v-model="showFormAddFile"
+            style="width: 300px;"
         >
+            <v-btn 
+                flat
+                color="error"
+                icon="mdi-close"
+                style="position: relative; right:-200px; top:-12px;"
+                @click="showFormAddFile = false">
+            </v-btn>
             <AddFile :dir="path" :key="keyAddFormFile" @listChanged="setNewObjcOnList"/>
         </v-dialog>
 
         <v-dialog
             v-model="showFormAddDir"
+            style="width: 300px;"
         >
+            <v-btn 
+                flat
+                color="error"
+                icon="mdi-close"
+                style="position: relative; right:-200px; top:-12px;"
+                @click="showFormAddDir = false">
+            </v-btn>
             <AddDir :dir="path" :key="keyAddFormDir" @listChanged="setNewObjcOnList"/>
         </v-dialog>
+        
         <v-row>
             <h3 class="py-4">Explorar Arquivos</h3>
         </v-row>

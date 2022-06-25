@@ -37,7 +37,7 @@
         <v-card class="py-5"  style="width: 100%;">
             
             <v-card-title>
-                <span class="text-h5">Nova Pasta</span>
+                <span class="text-h6">Adicionar Nova Pasta</span>
             </v-card-title>
 
             <v-card-text>

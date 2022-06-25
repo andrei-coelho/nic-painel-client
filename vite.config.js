@@ -7,13 +7,18 @@ const path = require('path')
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    vue(),
+
+    vue({
+        reactivityTransform: true
+    }),
     // https://github.com/vuetifyjs/vuetify-loader/tree/next/packages/vite-plugin
     vuetify({
       autoImport: true,
     }),
   ],
-  define: { 'process.env': {} },
+
+  //base: './',
+
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
