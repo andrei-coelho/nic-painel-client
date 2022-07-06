@@ -21,7 +21,7 @@
         <v-row>
             <v-col cols="12">
                 <v-expansion-panels>
-                    <v-expansion-panel>
+                    <v-expansion-panel v-model="filterOpen">
                         <v-expansion-panel-title>
                             <v-icon>mdi-filter-variant</v-icon>
                             Filtros
@@ -96,10 +96,10 @@
                                 </v-row>
                                 <v-row>
                                     <v-col cols="6">
-                                        <v-btn color="warning" @click="clean(true)">limpar</v-btn>
+                                        <v-btn color="warning" @click="clean(true); filterOpen = true">limpar</v-btn>
                                     </v-col>
                                      <v-col cols="6">
-                                        <v-btn color="info" class="float-right" @click="fitrar">aplicar</v-btn>
+                                        <v-btn color="info" class="float-right" @click="fitrar(); filterOpen = false">aplicar</v-btn>
                                     </v-col>
                                 </v-row>
                             </v-container>
@@ -186,6 +186,7 @@ export default {
 
     data() {
         return {
+            filterOpen:[0],
             ativo: this.dataSend.ativo,
             loadProfile: true,
             colors:[
@@ -237,6 +238,8 @@ export default {
             this.criarArrayFiltro()
             this.gerarEstatistica()
             this.gerarEstatisticaProfile()
+            console.log(this.filterOpen);
+            this.filterOpen = false
         },
 
         async gerarEstatistica(){
@@ -405,8 +408,10 @@ export default {
         }
     },
 
-    computed:{
-        
+    watch: {
+        filtered: function(){
+            this.panel = false
+        }
     }
 }
 </script>

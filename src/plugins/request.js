@@ -150,6 +150,7 @@ export default {
                 if(callbackE)
                 callbackE(error)
             });
+            console.log(response);
             return !response.error ? response.data.hashId : false;
         }
 
@@ -189,85 +190,96 @@ export default {
             
             data.hashId  = "";
             data.session = session; 
-
-            let parts = file.name.split('.');
-            data.mime = parts[parts.length -1];
+            let prts  = file.name.split('.');
+            data.mime = prts[prts.length -1];
             data.name = file.name.substring(0, file.name.length - (data.mime.length + 1));
+            data.file = "";
 
-            var reader = new FileReader();
+            const limitSize = (1000 * 16) - 1
+
+            let start  = 0
+            let end    = file.size > limitSize ? limitSize : file.size
+            let finish = false
+            let init   = true
+            var status = false
+            var parts  = Math.ceil((file.size > limitSize ? file.size / limitSize : 1));
+            var step   = 0;
+            const url  = url_api+route;
             
-            reader.addEventListener('error', e => {
-                callbackE("O arquivo é muito grande para fazer upload.")
-            })
+            var response;
 
-            reader.onload = async e => {
+            while(true){
                 
-                const file = e.target.result;
-                let size = file.length;
-                var status = true;
-                const url = url_api+route;
-                var response;
-                const max = 7864320;
+                if(init) {
+                    console.log("Criou o arquivo...");
+                    data.hashId = await request____create_ghost_file(url, data, callbackE);
+                    status = data.hashId !== false
+                    console.log(status);
+                    if(!status) break;
+                    init = false;
+                    continue;
+                }
 
-                if(size > max){
+                if(!status) break;
+
+                const reader = new FileReader();
+
+                reader.onerror = e => {
+                    callbackE("Ocorreu um erro no navegador.")
+                }
+
+                reader.onload = async e => {
+                   
+                    console.log("Adicionando dados...");
                     
-                    data.file = "";
-                    const content = file.split(";")[1].split(",")[1]
-                    size = content.length;
-                    let parts  = Math.ceil(size / max);
-                    let step   = 0;
-                    let partIn = 0;
-                    let init   = true;
-                    let quebra = max;
+                    const fresult = e.target.result;
+                    const buf = Buffer.alloc(fresult.byteLength);
+                    const view = new Uint8Array(fresult);
+                    
+                    for (let i = 0; i < buf.length; ++i) 
+                        buf[i] = view[i];
 
-                    let nextBrak = quebra;
+                    let base64String = buf.toString('base64');
+                    // envia o resultado
+                    let s_append = await request____append_file(url, base64String, callbackE)
+                    status = s_append
+                    
+                    step++;
+                    const porcent = Math.ceil((step / parts) * 100);
+                    if(onLoad) onLoad(porcent);
 
-                    while(partIn < size){
+                }
+                
+                if(end >= file.size){
+                    finish = true 
+                    end = file.size    
+                }
+                
 
-                        if(init) {
-                            data.hashId = await request____create_ghost_file(url, data, callbackE);
-                            if(!data.hashId) {
-                                status = false;
-                                break;
-                            }
-                            init = false;
-                            continue;
-                        }
-                        
-                        nextBrak  = nextBrak > size ? size : partIn+quebra;
-                        data.file = content.substring(partIn, nextBrak)
+                let slice = file.slice(start, end);
+                await reader.readAsArrayBuffer(slice);
 
-                        let s_append = await request____append_file(url, data, callbackE)
-                        if(!s_append) {
-                            status = false;
-                            break;
-                        }
-
-                        step++;
-                        const porcent = Math.ceil((step / parts) * 100);
-                        if(onLoad) onLoad(porcent);
-                        partIn = nextBrak;
-                        
+                if(status && finish) {
+                    if(status){
+                        console.log("fechando arquivo...");
+                        response = await request____commit_file(url, data);
                     }
+                        
+                    if(response){
+                        status = true;
+                        request__genResponse(response)
+                    }
+                    console.log("finalizou");
+                    // pare de mostrar o upload
+                    if(status && callbackS) callbackS(response);
+                };
+                start = end
+                end += limitSize
 
-                    if(status)
-                       response = await request____commit_file(url, data);
-                    
-                } else {
-                    data.file = file
-                    response = await request____save_file(url, data, callbackE, onLoad)
-                }
+            }
 
-                if(response){
-                    status = true;
-                    request__genResponse(response)
-                }
-                // pare de mostrar o upload
-                if(status && callbackS) callbackS(response);
-            };
-
-            return await reader.readAsDataURL(file);
-
+           
+            
         }
 
     }

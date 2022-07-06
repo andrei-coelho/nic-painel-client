@@ -116,7 +116,7 @@
                         size="x-large"
                     ></v-btn>
 
-                    <h5 class="px-2 text-center">{{ file.nome.length > 10 ? file.nome.substring(0, 7)+"..." : file.nome }}</h5>
+                    <h5 class="px-2 text-center">{{ file.nome.length > 23 ? file.nome.substring(0, 20)+"..." : file.nome }}</h5>
                     
                 </v-card>
             </div>
