@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer'
+
 export default {
     
     install : function (app, options) {
@@ -90,8 +92,7 @@ export default {
             .then(res => res.json())
             .then(res => res);
 
-            console.log(route, response);
-            //await new Promise(resolve => setTimeout(resolve, 10000));
+            // console.log(route, response);
             
             request__genResponse(response); 
             return response;
@@ -119,25 +120,6 @@ export default {
             return url + module +'/'+session+'/'+client_path+'/'+file;
         }
 
-        async function request____save_file(url, data, callbackE, onLoad){
-            
-            data.flag = 'save';
-            if(onLoad) onLoad(100);
-            
-            const response = await fetch(url, {
-                method: 'POST',
-                body: JSON.stringify(data)
-            })
-            .then(res => res.json())
-            .then(res => res)
-            .catch((error) => {
-                if(callbackE)
-                callbackE(error)
-            });
-            
-            return response;
-        }
-
         async function request____create_ghost_file(url, data, callbackE){
             data.flag = "create";
             const response = await fetch(url, {
@@ -150,7 +132,6 @@ export default {
                 if(callbackE)
                 callbackE(error)
             });
-            console.log(response);
             return !response.error ? response.data.hashId : false;
         }
 
@@ -195,7 +176,7 @@ export default {
             data.name = file.name.substring(0, file.name.length - (data.mime.length + 1));
             data.file = "";
 
-            const limitSize = (1000 * 16) - 1
+            const limitSize = (300000 * 16) - 1
 
             let start  = 0
             let end    = file.size > limitSize ? limitSize : file.size
@@ -211,10 +192,8 @@ export default {
             while(true){
                 
                 if(init) {
-                    console.log("Criou o arquivo...");
                     data.hashId = await request____create_ghost_file(url, data, callbackE);
                     status = data.hashId !== false
-                    console.log(status);
                     if(!status) break;
                     init = false;
                     continue;
@@ -222,46 +201,50 @@ export default {
 
                 if(!status) break;
 
-                const reader = new FileReader();
-
-                reader.onerror = e => {
-                    callbackE("Ocorreu um erro no navegador.")
-                }
-
-                reader.onload = async e => {
-                   
-                    console.log("Adicionando dados...");
-                    
-                    const fresult = e.target.result;
-                    const buf = Buffer.alloc(fresult.byteLength);
-                    const view = new Uint8Array(fresult);
-                    
-                    for (let i = 0; i < buf.length; ++i) 
-                        buf[i] = view[i];
-
-                    let base64String = buf.toString('base64');
-                    // envia o resultado
-                    let s_append = await request____append_file(url, base64String, callbackE)
-                    status = s_append
-                    
-                    step++;
-                    const porcent = Math.ceil((step / parts) * 100);
-                    if(onLoad) onLoad(porcent);
-
-                }
-                
                 if(end >= file.size){
                     finish = true 
                     end = file.size    
                 }
-                
 
-                let slice = file.slice(start, end);
-                await reader.readAsArrayBuffer(slice);
+                await new Promise((resolve, reject) => {
+
+                    const reader = new FileReader();
+
+                    reader.onerror = e => {
+                        callbackE("Ocorreu um erro no navegador.")
+                        //return reject
+                    }
+
+                    reader.onload = async e => {
+
+                        const fresult = e.target.result;
+                        const buf = Buffer.alloc(fresult.byteLength);
+                        const view = new Uint8Array(fresult);
+                        
+                        for (let i = 0; i < buf.length; ++i) 
+                            buf[i] = view[i];
+
+                        let base64String = buf.toString('base64');
+                        // envia o resultado
+                        data.file = base64String;
+                        let s_append = await request____append_file(url, data, callbackE)
+                        status = s_append
+                        
+                        step++;
+                        const porcent = Math.ceil((step / parts) * 100);
+                        onLoad(porcent);
+                        //await new Promise(resolve => setTimeout(resolve, 300));
+                        resolve();
+
+                    }
+                    
+                    let slice = file.slice(start, end);
+                    reader.readAsArrayBuffer(slice);
+
+                })
 
                 if(status && finish) {
                     if(status){
-                        console.log("fechando arquivo...");
                         response = await request____commit_file(url, data);
                     }
                         
@@ -269,10 +252,10 @@ export default {
                         status = true;
                         request__genResponse(response)
                     }
-                    console.log("finalizou");
                     // pare de mostrar o upload
-                    if(status && callbackS) callbackS(response);
+                    callbackS(response);
                 };
+
                 start = end
                 end += limitSize
 
