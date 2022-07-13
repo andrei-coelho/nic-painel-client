@@ -8,9 +8,14 @@ import Account from '../pages/AccountUser.vue'
 import ListPesquisasAtivas from '../pages/pesquisas/ListPesquisasAtivas.vue'
 import ListTodasPesquisas from '../pages/pesquisas/ListTodasPesquisas.vue'
 import AddPesquisa from '../pages/pesquisas/AddPesquisa.vue'
+import Notification from '../pages/Notification.vue'
 
 const router = createRouter({
     routes:[
+        {
+            path:'/notifications',
+            component: Notification
+        },
         {
             path:'/files@explore_files',
             component: ExploreFiles

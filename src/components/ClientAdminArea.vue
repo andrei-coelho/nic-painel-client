@@ -32,7 +32,7 @@
                     <div style="width:140px" class="d-none d-lg-block">
                     </div>
                     <v-col class="pa-0 ma-0">
-                        <TopMenuArea :pages="pages" :user="user" @actionCloseApp="closeApp" @changePageActionByTop="changePageByTopListener"/>
+                        <TopMenuArea :key="attNot" :notification="notification" :pages="pages" :user="user" @actionCloseApp="closeApp" @changePageActionByTop="changePageByTopListener"/>
                     </v-col>  
                 </v-row>
             </v-col>
@@ -128,13 +128,21 @@ export default {
 
         this.pages = resp.data.pages;
 
+        /*
+        setTimeout(e => {
+            this.notification = 2
+            this.attNot++
+            console.log(this.notification);
+        }, 4000)
+        */
+
     },
     
     data() {
         return {
-
+            attNot:0,
             reload:0,
-
+            notification:0,
             user:null,
             pages:null,
             subpages: [],

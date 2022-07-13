@@ -17,10 +17,15 @@
 
             <v-spacer></v-spacer>
             
-            <v-btn class="text-none" stacked>
-                <v-badge content="2" color="error">
+            <v-btn to="/notifications" class="text-none" stacked>
+                <div v-if="noti > 0">
+                    <v-badge :content="noti" color="error">
+                        <v-icon>mdi-bell-outline</v-icon>
+                    </v-badge>
+                </div>
+                <div v-else>
                     <v-icon>mdi-bell-outline</v-icon>
-                </v-badge>
+                </div>
             </v-btn>
 
             <v-menu v-model="drawer" location="start">
@@ -82,6 +87,7 @@ import MenuDrawer from './MenuDrawer.vue'
 export default {
     components: {MenuDrawer},
     props: {
+        notification:Number,
         pages:Array,
         user:Object
     },
@@ -89,6 +95,7 @@ export default {
         return {
             drawer:false,
             created:false,
+            noti:this.notification,
             logo: logo,
             userObject: {}
         }
