@@ -3,7 +3,7 @@
         <h2>Notificações</h2>
         <v-list density="compact" nav>
             <v-list-item v-for="notify,k in notifications" 
-                :active="notify.new" 
+                :active="notify.new == '1'" 
                 :key="k"
                 :to="notify.redirect"
                 class="border-bottom"
@@ -11,7 +11,7 @@
                 <v-container>
                     <v-row>
                         <v-col cols="3" md="2" lg="1">
-                            <v-icon class="ma-2" :color="notify.new ? 'white' : 'black'"> {{ notify.icon }} </v-icon> 
+                            <v-icon class="ma-2" :color="notify.new == '1' ? 'white' : 'black'"> {{ notify.icon }} </v-icon> 
                             <small>{{ notify.local }}</small>
                         </v-col>
                         <v-col cols="9" md="10" lg="11">
@@ -53,41 +53,17 @@ export default {
         
         async getNotifications(){
 
-            await new Promise(r => setTimeout(r, 1000));
+            let res = await this.$request('@notification/get_list')
+            if(res.error) return;
 
-            var nots = [
-                {
-                    new:true,
-                    local:'arquivos',
-                    data: '20/08/2022 as 18:30',
-                    text: "Texto vindo da API",
-                    redirect: "/files",
-                    icon: 'mdi-folder-open'
-                },
-                {
-                    new:true,
-                    local:'contas',
-                    data: '20/08/2022 as 18:30',
-                    text: "andrei@nic adicionou novo usuário: ricardo@nic",
-                    redirect: "/files",
-                    icon: 'mdi-account-box-outline'
-                },
-                {
-                    new:false,
-                    local:'arquivos',
-                    data: '20/08/2022 as 18:30',
-                    text: "andrei@nic adicionou novo arquivo",
-                    redirect: "/files",
-                    icon: 'mdi-folder-open'
-                }
-            ]
+            const nots  = res.data; 
             
-            const regex = /([\w]+@[^\s]+)/gm 
-            const isNew = "<span style='color:#FFFF99'>$1</span>";
+            const regex = /(([\w]+@[^\s]+)|('[\w\s\.]+'))/gm  
+            const isNew = "<span style='color:#FFFF99'>$1</span>"
             const isNot = "<span style='color:#0073EA'>$1</span>"
             
             for (let i = 0; i < nots.length; i++)
-                nots[i].text = nots[i].text.replace(regex, nots[i].new ? isNew : isNot);                
+                nots[i].text = nots[i].text.replace(regex, nots[i].new == "1" ? isNew : isNot);                
 
             this.notifications = nots
             this.isLoading = false

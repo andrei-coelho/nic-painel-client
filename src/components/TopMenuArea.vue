@@ -17,7 +17,7 @@
 
             <v-spacer></v-spacer>
             
-            <v-btn to="/notifications" class="text-none" stacked>
+            <v-btn @click="onClickBell" to="/notifications" class="text-none" stacked>
                 <div v-if="noti > 0">
                     <v-badge :content="noti" color="error">
                         <v-icon>mdi-bell-outline</v-icon>
@@ -85,6 +85,11 @@ import logo from '../assets/logo.svg'
 import MenuDrawer from './MenuDrawer.vue'
 
 export default {
+
+    created(){
+        this.getTotal()
+    },
+
     components: {MenuDrawer},
     props: {
         notification:Number,
@@ -95,13 +100,25 @@ export default {
         return {
             drawer:false,
             created:false,
-            noti:this.notification,
+            noti:0,
             logo: logo,
             userObject: {}
         }
     },
 
     methods: {
+
+        async getTotal(){
+            let res = await this.$request('@notification/get_count_new');
+            if(!res.error){
+                this.noti = res.data.total
+            }
+        },
+
+        onClickBell(){
+            this.noti = 0
+        },
+
         emitChangePage(slug){
             this.$emit('changePageActionByTop', slug)
         },
