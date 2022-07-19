@@ -1,6 +1,13 @@
 <template>
+
     <div v-if="!isLoading">
+        
         <h2>Notificações</h2>
+
+        <div v-if="notifications.length == 0">
+
+        </div>
+
         <v-list density="compact" nav>
             <v-list-item v-for="notify,k in notifications" 
                 :active="notify.new == '1'" 
@@ -24,6 +31,7 @@
             </v-list-item>
         </v-list>
     </div>
+
     <div v-else>
         <loadingComponent />
     </div>

@@ -32,6 +32,19 @@ export default {
             document.cookie = `${options.session_name}=; Max-Age=-99999999; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
         }
 
+        function request__getPref(key){
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${key}=`);
+            return parts.length === 2 ? parts.pop().split(';').shift() : null;
+        }
+
+        function request__setPref(key, value){
+            const d = new Date();
+            d.setTime(d.getTime() + (2*24*60*60*1000));
+            let expires = "expires="+ d.toUTCString();
+            document.cookie = key + "=" + value + ";" + expires + ";path=/";
+        }
+
         function request__setCookie(cookie = '') {
             session || cookie != '' ? (function(){
                 const d = new Date();
@@ -79,6 +92,10 @@ export default {
 
         app.config.globalProperties.$set_responses_on_request = function (obj){
             objApp = obj;
+        }
+
+        app.config.globalProperties.$preference = function (key, value = ''){
+            return value !== '' ? request__setPref(key, value) : request__getPref(key)
         }
         
         app.config.globalProperties.$request = async function (route, data = {}) {
