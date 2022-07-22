@@ -107,7 +107,14 @@
                     <div style="width:140px" class="d-none d-lg-block">
                     </div>
                     <v-col class="pa-0 ma-0">
-                        <TopMenuArea :key="attNot" :notification="notification" :pages="pages" :user="user" @actionCloseApp="closeApp" @changePageActionByTop="changePageByTopListener"/>
+                        <TopMenuArea 
+                            :key="attNot" 
+                            :notification="notification" 
+                            :pages="pages" 
+                            :user="user"
+                            @onClickNotification="resetNotification" 
+                            @actionCloseApp="closeApp" 
+                            @changePageActionByTop="changePageByTopListener"/>
                     </v-col>  
                 </v-row>
             </v-col>
@@ -202,16 +209,9 @@ export default {
         }
 
         this.pages = resp.data.pages;
-
-        this.$notify(this.onNotify, this.$request)
+        this.getTotalNotification()
+        this.$notify(this.onNotify, this.$request, this.$preference)
         this.loadNotify()
-        /*
-        setTimeout(e => {
-            this.notification = 2
-            this.attNot++
-            console.log(this.notification);
-        }, 4000)
-        */
 
     },
     
@@ -220,7 +220,7 @@ export default {
 
             notificationSelection:[],
             openDialogNotification:false,
-            attNot:0,
+            attNot:1,
             reload:0,
             notification:0,
             user:null,
@@ -243,11 +243,22 @@ export default {
 
     methods: {
 
+        resetNotification(){
+            this.notification=0
+            this.attNot++
+        },
+
+        async getTotalNotification(){
+            let res = await this.$request('@notification/get_count_new');
+            if(!res.error){
+                this.notification = res.data.total
+            }
+        },
+
         onNotify(){
-            console.log("aqui");
-            console.log(this.notification);
             this.notification++
             this.attNot++
+            console.log("atualizou");
         },
 
         loadNotify(){

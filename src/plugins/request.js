@@ -40,7 +40,7 @@ export default {
 
         function request__setPref(key, value){
             const d = new Date();
-            d.setTime(d.getTime() + (2*24*60*60*1000));
+            d.setTime(d.getTime() + (730*24*60*60*1000));
             let expires = "expires="+ d.toUTCString();
             document.cookie = key + "=" + value + ";" + expires + ";path=/";
         }
@@ -48,7 +48,7 @@ export default {
         function request__setCookie(cookie = '') {
             session || cookie != '' ? (function(){
                 const d = new Date();
-                d.setTime(d.getTime() + (2*24*60*60*1000));
+                d.setTime(d.getTime() + (400*24*60*60*1000));
                 let expires = "expires="+ d.toUTCString();
                 document.cookie = options.session_name + "=" + (session ? session : cookie) + ";" + expires + ";path=/";
             })() : request__resetCookie();
@@ -107,9 +107,8 @@ export default {
                 body: JSON.stringify(data)
             })
             .then(res => res.json())
-            .then(res => res);
-
-            // console.log(route, response);
+            .then(res => res)
+            .catch(e => console.log(e))
             
             request__genResponse(response); 
             return response;
@@ -173,9 +172,13 @@ export default {
                 method: 'POST',
                 body: JSON.stringify(data)
             })
-            .then(res => res.json())
+            .then(res => {
+                console.log(res.text());
+                return res.json();
+            })
             .then(res => res)
             .catch((error) => {
+                console.log(error);
                 if(callbackE)
                 callbackE(error)
             });
@@ -264,6 +267,8 @@ export default {
                     if(status){
                         response = await request____commit_file(url, data);
                     }
+
+                    console.log(response);
                         
                     if(response){
                         status = true;

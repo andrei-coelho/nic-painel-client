@@ -49,6 +49,13 @@
 
 <script>
 export default {
+
+  created() {
+
+    let device = this.$preference('device')
+    //console.log(device);
+  },
+
     data() {
         return {
             showPass: false,
@@ -63,13 +70,16 @@ export default {
         },
         async entrar(){
             this.overlay = true;
+            let device = this.$preference('device')
+            
             const resp = await this.$request('@auth/logar', {
                 email:this.email,
-                senha:this.senha
+                senha:this.senha,
+                device:  device == null ? "" : device
             });
             this.overlay = false;
             if(!resp.error) this.$emit('loged');
-        }
+        } 
     },
 }
 </script>

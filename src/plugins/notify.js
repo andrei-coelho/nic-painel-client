@@ -14,7 +14,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
-var request;
+var request, preference;
 
 export default {
 
@@ -25,14 +25,20 @@ export default {
         async function nofify__config(){
             try {
                 let tokenDevice = await getToken(messaging, { vapidKey: 'BNEvpY9TWJd9cP4vrHysbuipCzhDUH2DL7bAXYrJh5Nw795n5xROpaJisoPBLjwtrUvXWJ-ClmYE2gBqgpcLq4U' })
-                console.log(tokenDevice);
+                await preference('device', tokenDevice)
+                let status = await request('@notification/save_device', {
+                    device:tokenDevice
+                });
+                if(status.error) return -1;
+                return 1;
             } catch(e){
                 return 0;
             }
         }
 
-        app.config.globalProperties.$notify = function (listener, req){
+        app.config.globalProperties.$notify = function (listener, req, pref){
             request = req
+            preference = pref
             onMessage(messaging, payload => {
                 listener()
                 console.log("Message received. ", payload);
@@ -44,10 +50,10 @@ export default {
             let permission = await Notification.requestPermission();
             if (permission === "granted") {
                 await nofify__config()
-                return 1;
+                return  1;
             } else
             if (permission === "default") {
-                return 0;
+                return  0;
             }  else {
                 return -1;
             }

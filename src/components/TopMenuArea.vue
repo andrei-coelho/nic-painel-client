@@ -87,7 +87,7 @@ import MenuDrawer from './MenuDrawer.vue'
 export default {
 
     created(){
-        this.getTotal()
+        
     },
 
     components: {MenuDrawer},
@@ -100,7 +100,7 @@ export default {
         return {
             drawer:false,
             created:false,
-            noti:0,
+            noti: this.notification,
             logo: logo,
             userObject: {}
         }
@@ -108,15 +108,8 @@ export default {
 
     methods: {
 
-        async getTotal(){
-            let res = await this.$request('@notification/get_count_new');
-            if(!res.error){
-                this.noti = res.data.total
-            }
-        },
-
         onClickBell(){
-            this.noti = 0
+            this.$emit('onClickNotification')
         },
 
         emitChangePage(slug){
@@ -136,6 +129,7 @@ export default {
         if(Object.keys(this.userObject).length === 0 && this.user){
             this.userObject = this.user;
         }
-    }
+    },
+
 }
 </script>
